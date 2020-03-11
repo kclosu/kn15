@@ -16,6 +16,27 @@ precipitation = '0(?P<precip_amount>\d{3})(?P<precip_duration>\d)'
 
 NullValue = 'NIL'
 
+snow_depth_scale = [
+  "На льду снега нет.",
+  "менее 5 см.",
+  "5-10 см.",
+  "11-15 см.",
+  "16-20 см.",
+  "21-25 см.",
+  "26-35 см.",
+  "36-50 см.",
+  "51-70 см.",
+  "больше 70 см."
+]
+
+precipitation_duration_scale = [
+  "менее 1 ч.",
+  "от 1 до 3 ч.",
+  "от 3 до 6 ч.",
+  "от 6 до 12 ч.",
+  "более 12 ч."
+]
+
 report_pattern = f'^({identifier})\s({measure_time})(\s{stage})?(\s{change_stage})?(\s{previous_stage})?(\s{temperature})?(\s{ice})?(\s{water_condition})?(\s{ice_thickness})?(\s{discharge})?(\s{precipitation})?.*'
 print(report_pattern)
 
@@ -110,35 +131,62 @@ class KN15():
 
   @property
   def stage(self):
-    return self._stage
+    if self._stage is not None:
+      stage = int(self._stage)
+      return stage if stage < 5000 else (5000 - stage)
+    else:
+      return None
 
   @property
   def discharge(self):
-    return self._discharge
+    if self._discharge is not None:
+      return int(self._discharge) * pow(10, int(self._integer_part) - 3)
+    else:
+      return None
 
   @property
   def ice_thickness(self):
-    return self._ice_thickness
+    if self._ice_thickness:
+      return int(self._ice_thickness)
+    else:
+      return None
 
   @property
   def snow_depth(self):
-    return self._snow_depth
-
-  @property
-  def air_temperature(self):
-    return self._air_temp
+    if self._snow_depth is not None:
+      return snow_depth_scale[self._snow_depth]
+    else:
+      return None
 
   @property
   def water_temperature(self):
-    return self._water_temp
+    if self._water_temp is not None:
+      return int(self._water_temp) / 10
+    else:
+      return None
+
+  @property
+  def air_temperature(self):
+    if self._air_temp is not None:
+      air_temp = int(self._air_temp)
+      return air_temp if air_temp < 50 else (50 - air_temp)
+    else:
+      return None
 
   @property
   def precipation_duration(self):
-    return self._precip_duration
+    if self._precip_duration is not None:
+      return precipitation_duration_scale[int(self._precip_duration)]
+    else:
+      return None
 
   @property
   def precipation_amount(self):
-    return self._precip_amount
+    if self._precip_amount is not None:
+      precip_amount = int(self._precip_amount)
+      return precip_amount if precip_amount < 990 else (precip_amount - 990)/10
+    else:
+      return None
 
   def decode(self):
     return {
@@ -151,7 +199,9 @@ class KN15():
       'air_temperature': self.air_temperature,
       'water_temperature': self.water_temperature,
       'identifier': self.identifier,
-      'basin': self.basin
+      'basin': self.basin,
+      'day_of_month': self.measure_day,
+      'synophour': self.measure_time 
     }
 
 
@@ -173,5 +223,8 @@ if __name__ == "__main__":
   text = open('samples/20191010_SRUR44 UKMS 100500.hydra', 'r').read()
   for report in decode(text):
     print(report)
-    print(KN15(report).decode())
+    try:
+      print(KN15(report).decode())
+    except Exception as ex:
+      print(ex)
     
