@@ -51,6 +51,12 @@ class TestPrecipation(unittest.TestCase):
     report = kn15.KN15(s)
     self.assertEqual(report.precipation_amount, 4)
 
+class TestsSnow(unittest.TestCase):
+  def test_snow_zero(self):
+    s = '70844 20081 10276 20071 70120'
+    report = kn15.KN15(s)
+    self.assertEqual(report.snow_depth, "На льду снега нет.")
+
 
 if __name__ == '__main__':
   unittest.main()

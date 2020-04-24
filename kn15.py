@@ -1,4 +1,5 @@
 import re
+import click
 
 report_bounds = re.compile(r'^(.*?)=', re.DOTALL | re.MULTILINE)
 
@@ -15,6 +16,16 @@ discharge = '8(?P<integer_part>\d)(?P<discharge>\d{3})'
 precipitation = '0(?P<precip_amount>\d{3})(?P<precip_duration>\d)'
 
 NullValue = 'NIL'
+report_pattern = f'^({identifier})\s({measure_time})(\s{stage})?(\s{change_stage})?(\s{previous_stage})?(\s{temperature})?(\s{ice})?(\s{water_condition})?(\s{ice_thickness})?(\s{discharge})?(\s{precipitation})?.*'
+
+previous_days = '922(\d{2})(\s{stage})?(\s{change_stage})?(\s{previous_stage})?(\s{temperature})?(\s{ice})?(\s{water_condition})?(\s{ice_thickness})?(\s{discharge})?(\s{precipitation})?'
+flow = '933(\d{2})(\s.*)'
+pool_stage = '944(\d{2})(\s.*)'
+pool_flow = '955(\d{2})(\s.*)'
+flow_detail = '966(\d{2})(\s.*)'
+disasters = '97701(\s.*)97702(\s.*)97703(\s.*)97704(\s.*)97705(\s.*)97706(\s.*)97707(\s.*)'
+
+
 
 snow_depth_scale = [
   "На льду снега нет.",
@@ -36,15 +47,6 @@ precipitation_duration_scale = [
   "от 6 до 12 ч.",
   "более 12 ч."
 ]
-
-report_pattern = f'^({identifier})\s({measure_time})(\s{stage})?(\s{change_stage})?(\s{previous_stage})?(\s{temperature})?(\s{ice})?(\s{water_condition})?(\s{ice_thickness})?(\s{discharge})?(\s{precipitation})?.*'
-print(report_pattern)
-
-
-# weatherreports = 
-
-# groupidentifiers = (re.compile(''))
-# additionalgroupidentifiers = ()
 
 class KN15():
   def __init__(self, report):
@@ -105,10 +107,8 @@ class KN15():
     self._discharge = match.group('discharge')
     self._precip_amount = match.group('precip_amount')
     self._precip_duration = match.group('precip_duration')
-    parsed = {}
-    for group in self.properties:
-      parsed[group] = match.group(group)
-    return parsed
+
+    return {group:  match.group(group) for group in self.properties}
 
   @property
   def identifier(self):
@@ -127,6 +127,7 @@ class KN15():
     """
     measure day of month
     """
+    assert 1 <= self._YY <= 31, f'Day of month ${self._YY} is not between 1 and 31'
     return self._YY
 
   @property
@@ -154,7 +155,7 @@ class KN15():
   @property
   def snow_depth(self):
     if self._snow_depth is not None:
-      return snow_depth_scale[self._snow_depth]
+      return snow_depth_scale[int(self._snow_depth)]
     else:
       return None
 
@@ -219,12 +220,23 @@ def decode(bulletin):
   return bulletin_reports(bulletin[4:])
 
 
-if __name__ == "__main__":
-  text = open('samples/20191010_SRUR44 UKMS 100500.hydra', 'r').read()
-  for report in decode(text):
-    print(report)
+@click.command()
+@click.option('--filename', prompt='Bulletin file', help='path to file')
+def parse(filename):
+  with open(filename, 'r') as f:
+    bulletin = f.read()
+    for report in decode(bulletin):
+      print(report)
     try:
       print(KN15(report).decode())
     except Exception as ex:
       print(ex)
+
+
+if __name__ == "__main__":
+  # parse()
+  s = '10950 31082 10161 20042 30163 56565 70530 //053 94431 20165 45046 95531 43695 74109 94430 20168 45046 95530 43655 74109 94429 20172 45036 95529 43607 74105 94428 20177 45043 95528 43565 73995'
+  report = KN15(s)
+  print(report._parse())
+
     

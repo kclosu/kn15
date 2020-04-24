@@ -2,7 +2,22 @@ http://docs.cntd.ru/document/1200108241
 https://docplan.ru/Data2/1/4293792/4293792185.htm
 https://pdf.standartgost.ru/catalog/Data2/1/4293775/4293775610.pdf
 
-### Примеры
+```
+  identifier: String
+, basin: String
+, stage: Option[Int]
+, discharge: Option[Float]
+, ice_thickness: Option[Int]
+, snow_depth: Option[String]
+, precipation_duration: Option[String]
+, precipation_amount: Option[Int]
+, air_temperature: Option[Float]
+, water_temperature: Option[Float]
+, day_of_month: String
+, synophour: String
+```
+
+### Примеры сообщений о неблагоприятных явлениях
 1. 22 февраля на посту 82013 в 08 час уровень воды был 557 см.; к 18 час уровень поднялся до 996 см над нулем поста. В результате подъема река вышла из берегов и размыла железнодорожную насыпь. Подъем уровня продолжается. Штормовое сообщение имеет вид:
 
 ```ННZZ 82013 22187 97701 10996 24391 СНЕГОТАЯНИЕ ЛИВЕНЬ РАЗМЫТА НАСЫПЬ ЖЕЛЕЗНОЙ ДОРОГИ ПОДЪЕМ ПРОДОЛЖАЕТСЯ```
