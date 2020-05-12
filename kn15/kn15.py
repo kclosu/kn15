@@ -74,19 +74,6 @@ class KN15():
     self._discharge = None
     self._precip_amount = None
     self._precip_duration = None
-    self.properties = [
-      'basin', 'station_id',
-      'YY', 'GG', 'n',
-      'stage',
-      'change_stage', 'change_stage_sign',
-      'prev_stage',
-      'water_temp', 'air_temp',
-      'ice',
-      'water_condition',
-      'ice_thickness', 'snow_depth',
-      'integer_part', 'discharge',
-      'precip_amount', 'precip_duration'
-    ]
     self._parse()
 
   def _parse(self):
@@ -190,7 +177,7 @@ class KN15():
   @property
   def precipation_amount(self):
     if self._precip_amount is not None:
-      precip_amount = int(self._precip_amount)
+      precip_amount = float(self._precip_amount)
       return precip_amount if precip_amount < 990 else (precip_amount - 990)/10
     else:
       return None
