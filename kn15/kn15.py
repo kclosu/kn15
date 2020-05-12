@@ -87,28 +87,28 @@ class KN15():
     self._parse()
 
   def _parse(self):
-    match = re.match(report_pattern, self._report)
-    self._basin = match.group('basin')
-    self._station_id = match.group('station_id')
-    self._YY = match.group('YY')
-    self._GG = match.group('GG')
-    self._n = match.group('n')
-    self._stage = match.group('stage')
-    self._change_stage = match.group('change_stage')
-    self._change_stage_sign = match.group('change_stage_sign')
-    self._prev_stage = match.group('prev_stage')
-    self._water_temp = match.group('water_temp')
-    self._air_temp = match.group('air_temp')
-    self._ice = match.group('ice')
-    self._water_condition = match.group('water_condition')
-    self._ice_thickness = match.group('ice_thickness')
-    self._snow_depth = match.group('snow_depth')
-    self._integer_part = match.group('integer_part')
-    self._discharge = match.group('discharge')
-    self._precip_amount = match.group('precip_amount')
-    self._precip_duration = match.group('precip_duration')
+    match = re.match(report_pattern, self._report).groupdict()
+    self._basin = match.get('basin')
+    self._station_id = match.get('station_id')
+    self._YY = match.get('YY')
+    self._GG = match.get('GG')
+    self._n = match.get('n')
+    self._stage = match.get('stage')
+    self._change_stage = match.get('change_stage')
+    self._change_stage_sign = match.get('change_stage_sign')
+    self._prev_stage = match.get('prev_stage')
+    self._water_temp = match.get('water_temp')
+    self._air_temp = match.get('air_temp')
+    self._ice = match.get('ice')
+    self._water_condition = match.get('water_condition')
+    self._ice_thickness = match.get('ice_thickness')
+    self._snow_depth = match.get('snow_depth')
+    self._integer_part = match.get('integer_part')
+    self._discharge = match.get('discharge')
+    self._precip_amount = match.get('precip_amount')
+    self._precip_duration = match.get('precip_duration')
 
-    return {group:  match.group(group) for group in self.properties}
+    return {group:  match.get(group) for group in self.properties}
 
   @property
   def identifier(self):
@@ -216,7 +216,7 @@ def bulletin_reports(bulletin):
 
 def decode(bulletin):
   if bulletin.split()[0].upper() != 'HHZZ':
-    raise TypeError("")
+    raise TypeError("Report does not contain HHZZ in first line")
   return bulletin_reports(bulletin[4:])
 
 
@@ -227,10 +227,10 @@ def parse(filename):
     bulletin = f.read()
     for report in decode(bulletin):
       print(report)
-    try:
-      print(KN15(report).decode())
-    except Exception as ex:
-      print(ex)
+      try:
+        print(KN15(report).decode())
+      except Exception as ex:
+        print(ex)
 
 
 if __name__ == "__main__":
