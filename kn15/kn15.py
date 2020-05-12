@@ -26,7 +26,6 @@ flow_detail = '966(\d{2})(\s.*)'
 disasters = '97701(\s.*)97702(\s.*)97703(\s.*)97704(\s.*)97705(\s.*)97706(\s.*)97707(\s.*)'
 
 
-
 snow_depth_scale = [
   "На льду снега нет.",
   "менее 5 см.",
@@ -47,6 +46,10 @@ precipitation_duration_scale = [
   "от 6 до 12 ч.",
   "более 12 ч."
 ]
+
+class KN15Error(Exception):
+    """Class for exceptions raised when parsing report string"""
+    pass
 
 class KN15():
   def __init__(self, report):
@@ -87,28 +90,31 @@ class KN15():
     self._parse()
 
   def _parse(self):
-    match = re.match(report_pattern, self._report).groupdict()
-    self._basin = match.get('basin')
-    self._station_id = match.get('station_id')
-    self._YY = match.get('YY')
-    self._GG = match.get('GG')
-    self._n = match.get('n')
-    self._stage = match.get('stage')
-    self._change_stage = match.get('change_stage')
-    self._change_stage_sign = match.get('change_stage_sign')
-    self._prev_stage = match.get('prev_stage')
-    self._water_temp = match.get('water_temp')
-    self._air_temp = match.get('air_temp')
-    self._ice = match.get('ice')
-    self._water_condition = match.get('water_condition')
-    self._ice_thickness = match.get('ice_thickness')
-    self._snow_depth = match.get('snow_depth')
-    self._integer_part = match.get('integer_part')
-    self._discharge = match.get('discharge')
-    self._precip_amount = match.get('precip_amount')
-    self._precip_duration = match.get('precip_duration')
+    match = re.match(report_pattern, self._report)
+    if match is None:
+      raise KN15Error("Couldn't parse report string with regular expression")
+    parsed = match.groupdict()
+    self._basin = parsed.get('basin')
+    self._station_id = parsed.get('station_id')
+    self._YY = parsed.get('YY')
+    self._GG = parsed.get('GG')
+    self._n = parsed.get('n')
+    self._stage = parsed.get('stage')
+    self._change_stage = parsed.get('change_stage')
+    self._change_stage_sign = parsed.get('change_stage_sign')
+    self._prev_stage = parsed.get('prev_stage')
+    self._water_temp = parsed.get('water_temp')
+    self._air_temp = parsed.get('air_temp')
+    self._ice = parsed.get('ice')
+    self._water_condition = parsed.get('water_condition')
+    self._ice_thickness = parsed.get('ice_thickness')
+    self._snow_depth = parsed.get('snow_depth')
+    self._integer_part = parsed.get('integer_part')
+    self._discharge = parsed.get('discharge')
+    self._precip_amount = parsed.get('precip_amount')
+    self._precip_duration = parsed.get('precip_duration')
 
-    return {group:  match.get(group) for group in self.properties}
+    return parsed
 
   @property
   def identifier(self):
