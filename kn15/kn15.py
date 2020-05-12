@@ -133,7 +133,7 @@ class KN15():
     """
     measure day of month
     """
-    assert 1 <= self._YY <= 31, f'Day of month ${self._YY} is not between 1 and 31'
+    assert 1 <= int(self._YY) <= 31, f'Day of month ${self._YY} is not between 1 and 31'
     return self._YY
 
   @property
@@ -242,7 +242,9 @@ def parse(filename):
 if __name__ == "__main__":
   # parse()
   s = '10950 31082 10161 20042 30163 56565 70530 //053 94431 20165 45046 95531 43695 74109 94430 20168 45046 95530 43655 74109 94429 20172 45036 95529 43607 74105 94428 20177 45043 95528 43565 73995'
+  s = '05001 29081 10202 20212 30210 44103'
   report = KN15(s)
   print(report._parse())
+  print(report.decode())
 
     
