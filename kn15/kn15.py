@@ -8,22 +8,26 @@ measure_time = '(?P<YY>\d{2})(?P<GG>\d{2})(?P<n>\d)'
 stage = '1(?P<stage>\d{4})'
 change_stage = '2(?P<change_stage>\d{3}(?P<change_stage_sign>\d))'
 previous_stage = '3(?P<prev_stage>\d{4})'
-temperature = '4(?P<water_temp>\d{2})(?P<air_temp>\d{2})'
+temperature = '4(?P<water_temp>\d{2})(?P<air_temp>\d{2}|/{2})'
 ice = '5(?P<ice>\d{4})'
 water_condition = '6(?P<water_condition>\d{4})'
 ice_thickness = '7(?P<ice_thickness>\d{3})(?P<snow_depth>\d)'
 discharge = '8(?P<integer_part>\d)(?P<discharge>\d{3})'
-precipitation = '0(?P<precip_amount>\d{3})(?P<precip_duration>\d)'
+precipitation = '0(?P<precip_amount>\d{3})(?P<precip_duration>\d|/{2})'
 
-NullValue = 'NIL'
-report_pattern = f'^({identifier})\s({measure_time})(\s{stage})?(\s{change_stage})?(\s{previous_stage})?(\s{temperature})?(\s{ice})?(\s{water_condition})?(\s{ice_thickness})?(\s{discharge})?(\s{precipitation})?.*'
+standart_observation = f'(\s{stage})?(\s{change_stage})?(\s{previous_stage})?(\s{temperature})?(\s{ice})?(\s{water_condition})?(\s{ice_thickness})?(\s{discharge})?(\s{precipitation})?'
 
-previous_days = '922(\d{2})(\s{stage})?(\s{change_stage})?(\s{previous_stage})?(\s{temperature})?(\s{ice})?(\s{water_condition})?(\s{ice_thickness})?(\s{discharge})?(\s{precipitation})?'
+report_pattern = f'^({identifier})\s({measure_time})?{standart_observation}.*'
+
+previous_days = '922(\d{2})'
 flow = '933(\d{2})(\s.*)'
 pool_stage = '944(\d{2})(\s.*)'
 pool_flow = '955(\d{2})(\s.*)'
 flow_detail = '966(\d{2})(\s.*)'
 disasters = '97701(\s.*)97702(\s.*)97703(\s.*)97704(\s.*)97705(\s.*)97706(\s.*)97707(\s.*)'
+
+NullValue = 'NIL'
+
 
 
 snow_depth_scale = [
@@ -120,7 +124,7 @@ class KN15():
     """
     measure day of month
     """
-    assert 1 <= int(self._YY) <= 31, f'Day of month ${self._YY} is not between 1 and 31'
+    if not 1 <= int(self._YY) <= 31: raise KN15Error(f'Day of month {self._YY} is not between 1 and 31')
     return self._YY
 
   @property
@@ -161,7 +165,7 @@ class KN15():
 
   @property
   def air_temperature(self):
-    if self._air_temp is not None:
+    if self._air_temp is not None and self._air_temp != '//':
       air_temp = int(self._air_temp)
       return air_temp if air_temp < 50 else (50 - air_temp)
     else:
@@ -229,6 +233,7 @@ def parse(filename):
 if __name__ == "__main__":
   # parse()
   s = '10950 31082 10161 20042 30163 56565 70530 //053 94431 20165 45046 95531 43695 74109 94430 20168 45046 95530 43655 74109 94429 20172 45036 95529 43607 74105 94428 20177 45043 95528 43565 73995'
+  s = '11085 94411 10503 20508 40193 73145 95511 24115 44265 74254'
   report = KN15(s)
   print(report._parse())
   print(report.decode())

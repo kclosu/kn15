@@ -37,6 +37,12 @@ class TestTemperatures(unittest.TestCase):
     self.assertEqual(report.water_temperature, 1)
     self.assertEqual(report.air_temperature, -49)
   
+  def test_missing_value(self):
+    s = '79403 04081 10177 20000 30177 411// 62307 80640 00063'
+    report = kn15.KN15(s)
+    self.assertEqual(report.air_temperature, None)
+    self.assertEqual(report.water_temperature, 1.1)
+  
 
 class TestDischarge(unittest.TestCase):
   def test_discharge(self):
@@ -56,6 +62,16 @@ class TestsSnow(unittest.TestCase):
     s = '70844 20081 10276 20071 70120'
     report = kn15.KN15(s)
     self.assertEqual(report.snow_depth, "На льду снега нет.")
+
+class TestDateAndTime(unittest.TestCase):
+  def test_day_of_month(self):
+    s = '05001 29081 10202 20212 30210 44103'
+    report = kn15.KN15(s)
+    self.assertEqual(report.measure_day, '29')
+
+class TestDecode(unittest.TestCase):
+  def test_decode(self):
+    pass
 
 
 if __name__ == '__main__':

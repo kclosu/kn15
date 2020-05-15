@@ -10,8 +10,8 @@ https://pdf.standartgost.ru/catalog/Data2/1/4293775/4293775610.pdf
 , ice_thickness: Option[Int]
 , snow_depth: Option[String]
 , precipation_duration: Option[String]
-, precipation_amount: Option[Int]
-, air_temperature: Option[Float]
+, precipation_amount: Option[Float]
+, air_temperature: Option[Int]
 , water_temperature: Option[Float]
 , day_of_month: String
 , synophour: String
