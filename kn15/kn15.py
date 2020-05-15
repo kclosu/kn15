@@ -138,7 +138,7 @@ class KN15():
   @property
   def discharge(self):
     if self._discharge is not None:
-      return int(self._discharge) * pow(10, int(self._integer_part) - 3)
+      return float(self._discharge) * pow(10, int(self._integer_part) - 3)
     else:
       return None
 
