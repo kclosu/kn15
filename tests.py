@@ -24,6 +24,14 @@ class TestStage(unittest.TestCase):
     self.assertEqual(kn15.KN15(s).stage, -9)
 
 
+class TestIdentifier(unittest.TestCase):
+  def test_identifier(self):
+    s = '11085 94411 10503 20508 40193 73145 95511 24115 44265 74254'
+    self.assertEqual(kn15.KN15(s).identifier, '11085')
+    s = '41001 04081 15009 48303'
+    self.assertEqual(kn15.KN15(s).identifier, '41001')
+
+
 class TestTemperatures(unittest.TestCase):
   def test_positive(self):
     s = '41010 04081 10139 20131 49904'
@@ -72,6 +80,13 @@ class TestDateAndTime(unittest.TestCase):
 class TestDecode(unittest.TestCase):
   def test_decode(self):
     pass
+
+
+class TestIce(unittest.TestCase):
+  def test_intensity(self):
+    s = '08945 21081 10501 20021 412// 53901='
+    report = kn15.KN15(s)
+    self.assertEqual(report.ice_conditions[0]['intensity'], 10)
 
 
 if __name__ == '__main__':
