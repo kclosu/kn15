@@ -230,7 +230,8 @@ class KN15():
       'identifier': self.identifier,
       'basin': self.basin,
       'day_of_month': self.measure_day,
-      'synophour': self.measure_time 
+      'synophour': self.measure_time,
+      'ice_conditions': self.ice_conditions
     }
 
 
@@ -262,12 +263,12 @@ def parse(filename):
 
 
 if __name__ == "__main__":
-  # parse()
+  parse()
   # s = '10950 31082 10161 20042 30163 56565 70530 //053 94431 20165 45046 95531 43695 74109 94430 20168 45046 95530 43655 74109 94429 20172 45036 95529 43607 74105 94428 20177 45043 95528 43565 73995'
-  s = '11085 94411 10503 20508 40193 73145 95511 24115 44265 74254'
-  report = KN15(s)
+  # s = '11085 94411 10503 20508 40193 73145 95511 24115 44265 74254'
+  # report = KN15(s)
   # # print(report._parse())
-  print(report.decode())
+  # print(report.decode())
 
     
 ice_conditions = [
