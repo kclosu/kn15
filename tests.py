@@ -71,7 +71,7 @@ class TestsSnow(unittest.TestCase):
   def test_snow_zero(self):
     s = '70844 20081 10276 20071 70120'
     report = kn15.KN15(s)
-    self.assertEqual(report.snow_depth, "На льду снега нет.")
+    self.assertEqual(report.snow_depth, "На льду снега нет")
 
 class TestDateAndTime(unittest.TestCase):
   def test_day_of_month(self):
