@@ -4,14 +4,16 @@ import kn15
 
 class TestBulletinSplitMethods(unittest.TestCase):
   def test_split(self):
-    s = open('samples/20191010_SRUR44 UKMS 100500.hydra', 'r').read()
-    self.assertEqual(len(list(kn15.decode(s))), 23)
+    with open('samples/6474.hydra', 'r') as f:
+      s = f.read()
+      self.assertEqual(len(list(kn15.decode(s))), 19)
 
   def test_multiline_report(self):
-    s = open('samples/20191004_SRUR42 UKMS 040500 CCC.hydra', 'r').read()
-    reports = list(kn15.decode(s))
-    self.assertEqual(len(reports), 1)
-    self.assertEqual(reports[0], '79403 04081 10177 20000 30177 411// 62307 80640 00063 98803 00063')
+    with open('samples/3146.hydra', 'r') as f:
+      s = f.read()
+      reports = list(kn15.decode(s))
+      self.assertEqual(len(reports), 1)
+      self.assertEqual(reports[0], '79403 04081 10177 20000 30177 411// 62307 80640 00063 98803 00063')
 
 
 class TestStage(unittest.TestCase):
@@ -69,7 +71,7 @@ class TestsSnow(unittest.TestCase):
   def test_snow_zero(self):
     s = '70844 20081 10276 20071 70120'
     report = kn15.KN15(s)
-    self.assertEqual(report.snow_depth, "На льду снега нет.")
+    self.assertEqual(report.snow_depth, "На льду снега нет")
 
 class TestDateAndTime(unittest.TestCase):
   def test_day_of_month(self):
