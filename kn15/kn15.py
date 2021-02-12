@@ -318,21 +318,21 @@ class KN15():
 
   @property
   def air_temperature(self):
-    if self._air_temp is not None and self._air_temp != '//':
+    if self._air_temp is not None and self._air_temp not in ('//', '99'):
       air_temp = int(self._air_temp)
       return air_temp if air_temp < 50 else (50 - air_temp)
     else:
       return None
 
   @property
-  def precipation_duration(self):
+  def precipitation_duration(self):
     if self._precip_duration is not None:
       return precipitation_duration_scale[int(self._precip_duration)]
     else:
       return None
 
   @property
-  def precipation_amount(self):
+  def precipitation_amount(self):
     if self._precip_amount is not None:
       precip_amount = float(self._precip_amount)
       return precip_amount if precip_amount < 990 else (precip_amount - 990)/10
@@ -345,8 +345,8 @@ class KN15():
       'discharge': self.discharge,
       'ice_thickness': self.ice_thickness,
       'snow_depth': self.snow_depth,
-      'precipation_duration': self.precipation_duration,
-      'precipation_amount': self.precipation_amount,
+      'precipitation_duration': self.precipitation_duration,
+      'precipitation_amount': self.precipitation_amount,
       'air_temperature': self.air_temperature,
       'water_temperature': self.water_temperature,
       'identifier': self.identifier,

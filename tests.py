@@ -20,11 +20,16 @@ class TestStage(unittest.TestCase):
   def test_positive(self):
     s = '79033 04081 10027 20041 30025 41299 62201 82768'
     self.assertEqual(kn15.KN15(s).stage, 27)
+    self.assertEqual(kn15.KN15('79033 04081 10005').stage, 5)
+    self.assertEqual(kn15.KN15('79033 04081 10012').stage, 12)
+    self.assertEqual(kn15.KN15('79033 04081 10131').stage, 131)
+    self.assertEqual(kn15.KN15('79033 04081 11011').stage, 1011)
 
   def test_negative(self):
     s = '41001 04081 15009 48303'
     self.assertEqual(kn15.KN15(s).stage, -9)
-
+    self.assertEqual(kn15.KN15('41001 04081 15036').stage, -36)
+    self.assertEqual(kn15.KN15('41001 04081 15223').stage, 223)
 
 class TestIdentifier(unittest.TestCase):
   def test_identifier(self):
@@ -44,8 +49,8 @@ class TestTemperatures(unittest.TestCase):
   def test_negative(self):
     s = '79432 10081 10303 20021 30302 41099 62203 81385 90021 00052'
     report = kn15.KN15(s)
-    self.assertEqual(report.water_temperature, 1)
-    self.assertEqual(report.air_temperature, -49)
+    self.assertEqual(report.water_temperature, 10)
+    self.assertEqual(report.air_temperature, None)
   
   def test_missing_value(self):
     s = '79403 04081 10177 20000 30177 411// 62307 80640 00063'
@@ -60,12 +65,11 @@ class TestDischarge(unittest.TestCase):
     report = kn15.KN15(s)
     self.assertEqual(report.discharge, 3.2)
 
-
-class TestPrecipation(unittest.TestCase):
-  def test_precipation(self):
+class TestPrecipitation(unittest.TestCase):
+  def test_precipitation(self):
     s = '81017 10081 10179 20022 30180 40910 81320 00041 98809 00031'
     report = kn15.KN15(s)
-    self.assertEqual(report.precipation_amount, 4)
+    self.assertEqual(report.precipitation_amount, 4)
 
 class TestsSnow(unittest.TestCase):
   def test_snow_zero(self):

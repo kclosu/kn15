@@ -120,3 +120,5 @@ with open(filename, 'r') as f:
     except Exception as ex:
       print(ex)
 ```
+## TODO:
+*explaine how to differenciate water temeprature 2 and 20, how about water under 10C
