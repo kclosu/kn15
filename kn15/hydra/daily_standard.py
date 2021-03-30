@@ -301,8 +301,6 @@ class StandardObservation():
     @property
     def stage(self):
         """Return 'stage' from Group_1"""
-        print('>>', self._stage)
-        print(self.is_not_empty(self._stage))
         if self.is_not_empty(self._stage):
             return self.get_stage(self._stage)
         else:
@@ -335,7 +333,10 @@ class StandardObservation():
     def water_temperature(self):
         """Work incorrect. Instruction does not explain different between 1 and 10 in code '10'"""
         if self._water_temp is not None:
-            return int(self._water_temp) / 10
+            if self._air_temp is not None and self._air_temp == '99':
+                return int(self._water_temp)
+            else:
+                return int(self._water_temp) / 10
         else:
             return None
 

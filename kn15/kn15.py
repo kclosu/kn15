@@ -1,6 +1,6 @@
 import re
 import click
-from hydra.daily_standard import StandardObservation
+from .hydra.daily_standard import StandardObservation
 
 report_bounds = re.compile(r'^(.*?)=', re.DOTALL | re.MULTILINE)
 
