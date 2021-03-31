@@ -29,7 +29,7 @@ class KN15Match(unittest.TestCase):
       '92228 15140 20142 30175 499// 56563 56401 61105 61541 70511 80001 99894 09090'
     ])
     day_from_second_group = StandardObservation(KN15(s).previous_standard_daily[0]).decode()[1]
-    self.assertEqual(day_from_second_group, '30')
+    self.assertEqual(day_from_second_group, 30)
 
 class TestDateAndTime(unittest.TestCase):
   def test_day_of_month(self):

@@ -1,6 +1,8 @@
 import re
 import click
-from .hydra.daily_standard import StandardObservation
+from hydra.daily_standard import StandardObservation
+from hydra.stage_and_flow import StageAndFlow
+from hydra.hydra_lib import Error, valid_date, valid_time
 
 report_bounds = re.compile(r'^(.*?)=', re.DOTALL | re.MULTILINE)
 
@@ -9,11 +11,6 @@ MEASURE_TIME = r'(?P<YY>\d{2})(?P<GG>\d{2})(?P<n>[1-5,7])'
 ADDITIONAL_SECTIONS_TAGS = r'9[22|33|44|55|66|77|88]\d{2}'
 
 NullValue = 'NIL'
-
-
-class KN15Error(Exception):
-    """Class for exceptions raised when parsing report string"""
-    pass
 
 
 class KN15():
@@ -31,7 +28,7 @@ class KN15():
         self._n = None
         self._standard_daily = None
         self._previous_standard_daily = []
-        self._stage_and_flow_period = []
+        self._stage_and_flow = []
         self._reservoir_stage_and_volume_daily = []
         self._reservoir_inflow_daily = []
         self._reservoir_flow_and_surface_period = []
@@ -45,7 +42,7 @@ class KN15():
         measure_time = self._report[6:11]
         match = re.match(MEASURE_TIME, measure_time)
         if match is None:
-            raise KN15Error("Couldn't parse report string with regular expression")
+            raise Error("Couldn't parse report string with regular expression")
         parsed = match.groupdict()
         self._YY = parsed.get('YY')
         self._GG = parsed.get('GG')
@@ -58,7 +55,7 @@ class KN15():
             if re.match(r'922(\d{2})(\s.*)', part):
                 self._previous_standard_daily.append(part)
             if re.match(r'933(\d{2})(\s.*)', part):
-                self._stage_and_flow_period.append(part)
+                self._stage_and_flow.append(part)
             if re.match(r'944(\d{2})(\s.*)', part):
                 self._reservoir_stage_and_volume_daily.append(part)
             if re.match(r'955(\d{2})(\s.*)', part):
@@ -70,12 +67,6 @@ class KN15():
 
         return parsed
 
-    @staticmethod
-    def valid_date(date):
-        if date and not 1 <= int(date) <= 31:
-            raise KN15Error(f'Day of month {date} is not between 1 and 31')
-        return True
-
     @property
     def identifier(self):
         return int(f'{self._basin}{self._station_id}')
@@ -86,15 +77,13 @@ class KN15():
 
     @property
     def measure_time(self):
-        if self._GG and not 0 <= int(self._GG) <= 23:
-            raise KN15Error(f'Time of measure {self._GG} is not between 00 and 23')
-        return int(self._GG)
+        return valid_time(self._GG)
 
     @property
     def measure_day(self):
         """measure day of month"""
-        self.valid_date(self._YY)
-        return int(self._YY)
+        return valid_date(self._YY)
+
 
     @property
     def standard_daily(self):
@@ -111,9 +100,9 @@ class KN15():
             return None
 
     @property
-    def stage_and_flow_period(self):
-        if len(self._stage_and_flow_period) > 0:
-            return self._stage_and_flow_period
+    def stage_and_flow(self):
+        if len(self._stage_and_flow) > 0:
+            return self._stage_and_flow
         else:
             return None
 
@@ -145,34 +134,45 @@ class KN15():
         else:
             return None
 
+    def prepare_head(self, day=None):
+        out = dict({
+            'identifier': self.identifier,
+            'basin': self.basin,
+            'day_of_month': self.measure_day,
+            'synophour': self.measure_time
+        })
+        if day != None:
+            out['day_of_month'] = int(day)
+            out['synophour'] = 8
+        return out
+
     def decode(self):
-        res_out = []
+        out = []
         if self.standard_daily is not None:
-            out = dict({
-                'identifier': self.identifier,
-                'basin': self.basin,
-                'day_of_month': self.measure_day,
-                'synophour': self.measure_time
-            })
-            output, _ = StandardObservation(self.standard_daily).decode()
-            if output is not None:
-                out.update(output)
-            res_out.append(out)
+            output = self.prepare_head()
+            body, _ = StandardObservation(self.standard_daily).decode()
+            if body is not None:
+                output.update(body)
+            out.append(output)
 
         if self.previous_standard_daily is not None:
             for previous_standard_daily in self.previous_standard_daily:
-                output, day = StandardObservation(previous_standard_daily).decode()
-                self.valid_date(day)
-                out = ({
-                    'identifier': self.identifier,
-                    'basin': self.basin,
-                    'day_of_month': int(day),
-                    'synophour': 8
-                })
-                if output is not None:
-                    out.update(output)
-                res_out.append(out)
-            return res_out
+                body, day = StandardObservation(previous_standard_daily).decode()
+                output = self.prepare_head(day)
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+
+        if self.stage_and_flow is not None:
+            for stage_and_flow in self.stage_and_flow:
+                body = StageAndFlow(stage_and_flow).decode()
+                output = self.prepare_head()
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+
+        return out
+
 
 
 def bulletin_reports(bulletin):
