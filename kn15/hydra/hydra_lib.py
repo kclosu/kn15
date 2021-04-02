@@ -148,7 +148,7 @@ PRECIPITATION_DURATION_SCALE = [
     "более 12 ч"
 ]
 
-"""Section 3 Group 933"""
+"""Section 3 Group 3"""
 PERIODS = {
     1: 'за прошедшие сутки',
     11: 'за первую декаду',
@@ -161,25 +161,113 @@ PERIODS = {
     5: 'за половодье'
 }
 
+"""Section 6 Group 6"""
+WIND_DIRECTION_SCALE = [
+    'ветра нет, штиль',
+    'с северо-востока',
+    'с востока',
+    'с юго-востока',
+    'с юга',
+    'с юго-запада',
+    'с запада',
+    'с северо-запада',
+    'с севера',
+    'установить невозможно'
+]
+
+"""Section 6 Group 7"""
+WAVE_DIRECTION_SCALE = [
+    'волнения нет',
+    'с северо-востока',
+    'с востока',
+    'с юго-востока',
+    'с юга',
+    'с юго-запада',
+    'с запада',
+    'с северо-запада',
+    'с севера',
+    'толчея'
+]
+
+"""Section 6 Group 7"""
+WATER_SURFACE_SCALE = [
+    'Зеркально-гладкая поверхность.',
+    'Рябь, появляются небольшие гребни волн.',
+    'Небольшие гребни волн начинают опрокидываться, но пена не белая, а стекловидная.',
+    'Хорошо заметные небольшие волны, гребни некоторых из них опрокидываются, \
+    образуя местами белую клубящуюся пену — «барашки».',
+    'Волны принимают хорошо выраженную форму, повсюду образуются «барашки».',
+    'Появляются гребни большой высоты, их пенящиеся вершины занимают большие площади, \
+    ветер начинает срывать пену с гребней волн.',
+    'Гребни очерчивают длинные волны ветровых волн; \
+    пена, срываемая с гребней ветром начинает вытягиваться полосами по склонам волн.',
+    'Длинные полосы пены, срываемые ветром, покрывают склоны волн, а местами, сливаясь, достигают их подошв.',
+    'Пена широкими, плотными, сливающимися полосами покрывает склоны волн, отчего вся поверхность становится белой; \
+    только местами, во впадинах волн, видны свободные от пены участки.',
+    'Поверхность воды покрыта плотным слоем пены, воздух наполнен водяной пылью и брызгами, \
+    видимость значительно уменьшена.'
+]
+
+"""Section 7 Group 0"""
+disaster_types = {
+    1: 'Высокие уровни воды (при половодьях, дождевых паводках, заторах, \
+зажорах, ветровых нагонах), при которых наблюдается затопление \
+пониженных частей городов, населенных пунктов, посевов \
+сельскохозяйственных культур, автомобильных дорог или повреждение \
+хозяйственных объектов.',
+    2: 'Низкие уровни воды — ниже проектных отметок водозаборных \
+сооружений крупных городов, промышленных районов и оросительных \
+систем, навигационных уровней на судоходных реках.',
+    3: 'Раннее (октябрь) образование ледостава и появление льда на \
+судоходных реках, повторяющееся не чаще чем 1 раз в 10 лет.',
+    4: 'Очень большие или очень малые расходы воды, приток в водохранилище, \
+сброс воды через гидроузел, нарушающие нормальные условия работы \
+оросительных систем, гидротехнических сооруженный других \
+хозяйственных объектов.',
+    5: 'Очень сильный дождь - количество осадков не менее 50 мм за период \
+не более 12 часов; продолжительный очень сильный дождь – количество \
+осадков не менее 100 мм за период более 12 часов, но менее 48 часов.'
+}
+
+"""Section 7 Group 0 (short)"""
+DISASTER_TYPES_SHORT = {
+    1: 'высокие уровни воды',
+    2: 'низкие уровни воды',
+    3: 'раннее образование ледостава',
+    4: 'очень большие или очень малые расходы воды',
+    5: 'очень сильный дождь'
+}
 
 class Error(Exception):
     """Class for exceptions raised when parsing report string"""
     pass
 
 
-def valid_date(date):
-    if is_not_empty(date) and not 1 <= int(date) <= 31:
-        raise Error(f'Day of month {date} is not between 1 and 31')
-    if date is None:
+def valid_date(yy):
+    if is_not_empty(yy) and not 1 <= int(yy) <= 31:
+        raise Error(f'Day of month {yy} is not between 1 and 31')
+    if yy is None:
         return None
     else:
-        return int(date)
+        return int(yy)
 
 
-def valid_time(time, lim=23):
-    if is_not_empty(time) and not 0 <= int(time) <= lim:
-        raise Error(f'Time of measure {time} is not between 00 and {lim}')
-    return int(time)
+def valid_time(gg, lim=23):
+    if is_not_empty(gg) and not 0 <= int(gg) <= lim:
+        raise Error(f'Time of measure {gg} is not between 00 and {lim}')
+    if gg is None:
+        return None
+    else:
+        return int(gg)
+
+
+def valid_month(mm):
+    if is_not_empty(mm) and not 1 <= int(mm) <= 12:
+        raise Error(f'Month {mm} is not between 1 and 12')
+    if mm is None:
+        return None
+    else:
+        return int(mm)
 
 
 def is_not_empty(param):
@@ -206,9 +294,11 @@ def get_stage(stage):
     return stage if stage < 5000 else (5000 - stage)
 
 
-def get_flow(flow, int_part):
-    """Return 'flow' according to 'Section 1 Group 8' rules"""
-    return float(flow) * pow(10, int(int_part) - 3)
+def get_flow(flow):
+    """Return 'flow' according to 'Section 1 Group 8' rules.
+    Use the same to return 'volume' from 'Section 4 Group 7 (and 8)'
+    and 'area' from 'Section 6 Group 3'."""
+    return float(flow[1:]) * pow(10, int(flow[0]) - 3)
 
 
 def get_conditions(conditions, dict, verbose=False):
@@ -263,14 +353,29 @@ def get_amount(precip_amount, verbose=False):
         return precip_amount if precip_amount < 990 else (precip_amount - 990) / 10
 
 
-def get_duration(duration, arr, verbose=False):
+def get_scale(param, scale, verbose=False):
     """Parse 'precipitation_duration' with duration array according to 'Section 1 Group 9 (and 0)' rules.
-     Use 'verbose=True' to return conditions title."""
-    duration = int(duration)
-    if 0 <= duration < len(arr):
+    Use the same to return 'wind_direction', 'wave_direction', 'surface_condition' from 'Section 6 Group 6 (and 7)'
+    Use 'verbose=True' to return conditions title."""
+    param = int(param)
+    if 0 <= param < len(scale):
         if verbose:
-            return arr[duration]
+            return scale[param]
         else:
-            return duration
+            return param
     else:
-        raise Error(f'Array does not contain match for element code {duration}')
+        raise Error(f'Array does not contain match for element code {param}')
+
+
+def get_identify_param(param, dict, verbose=False):
+    """Parse 'period' and 'disaster_type', with dictionary.
+    Raise error if param is empty.
+    Use 'verbose=True' to return conditions title."""
+    param = int(param)
+    if key_in_dict(param, dict):
+        if verbose:
+            return dict[param]
+        else:
+            return param
+    else:
+        raise Error(f'Identify parameter is empty')

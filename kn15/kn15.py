@@ -2,7 +2,11 @@ import re
 import click
 from hydra.daily_standard import StandardObservation
 from hydra.stage_and_flow import StageAndFlow
+from hydra.reservoir_stage_and_volume import StageAndVolume
+from hydra.reservoir_inflow import Inflow
+from hydra.reservoir_flow_and_surface import FlowAndSurface
 from hydra.hydra_lib import Error, valid_date, valid_time
+from hydra.disasters import Disaster
 
 report_bounds = re.compile(r'^(.*?)=', re.DOTALL | re.MULTILINE)
 
@@ -31,7 +35,7 @@ class KN15():
         self._stage_and_flow = []
         self._reservoir_stage_and_volume_daily = []
         self._reservoir_inflow_daily = []
-        self._reservoir_flow_and_surface_period = []
+        self._reservoir_flow_and_surface = []
         self._disasters = []
         self._parse()
 
@@ -61,7 +65,7 @@ class KN15():
             if re.match(r'955(\d{2})(\s.*)', part):
                 self._reservoir_inflow_daily.append(part)
             if re.match(r'966(\d{2})(\s.*)', part):
-                self._reservoir_flow_and_surface_period.append(part)
+                self._reservoir_flow_and_surface.append(part)
             if re.match(r'9770[1-5](\s.*)', part):
                 self._disasters.append(part)
 
@@ -122,8 +126,8 @@ class KN15():
 
     @property
     def reservoir_flow_and_surface_period(self):
-        if len(self._reservoir_flow_and_surface_period) > 0:
-            return self._reservoir_flow_and_surface_period
+        if len(self._reservoir_flow_and_surface) > 0:
+            return self._reservoir_flow_and_surface
         else:
             return None
 
@@ -171,6 +175,38 @@ class KN15():
                     output.update(body)
                 out.append(output)
 
+        if self.reservoir_stage_and_volume_daily is not None:
+            for stage_and_volume in self.reservoir_stage_and_volume_daily:
+                body, day = StageAndVolume(stage_and_volume).decode()
+                output = self.prepare_head(day)
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+
+        if self.reservoir_inflow_daily is not None:
+            for inflow in self.reservoir_inflow_daily:
+                body, day = Inflow(inflow).decode()
+                output = self.prepare_head(day)
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+
+        if self.reservoir_flow_and_surface_period is not None:
+            for flow_and_surface in self.reservoir_flow_and_surface_period:
+                body = FlowAndSurface(flow_and_surface).decode()
+                output = self.prepare_head()
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+
+        if self.disasters is not None:
+            for disaster in self.disasters:
+                body = Disaster(disaster).decode()
+                output = self.prepare_head()
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+                
         return out
 
 
