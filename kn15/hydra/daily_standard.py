@@ -13,8 +13,8 @@ GROUP_8 = r'8(?P<group_8>\d{4})'
 GROUP_9 = r'9(?P<group_9_part_0>\d{3}|/{3})(?P<group_9_part_1>\d|/)'
 GROUP_0 = r'0(?P<group_0_part_0>\d{3}|/{3})(?P<group_0_part_1>\d|/)'
 
-STANDARD_OBSERVATION = f'^({GROUP_1})?(\s{GROUP_2})?(\s{GROUP_3})?(\s{GROUP_4})?(\s{GROUP_5})*(\s{GROUP_6})*\
-(\s{GROUP_7})?(\s{GROUP_8})?(\s{GROUP_9})?(\s{GROUP_0})?'
+STANDARD_OBSERVATION = f'^(\s?{GROUP_1})?(\s?{GROUP_2})?(\s?{GROUP_3})?(\s?{GROUP_4})?(\s?{GROUP_5})*(\s?{GROUP_6})*\
+(\s?{GROUP_7})?(\s?{GROUP_8})?(\s?{GROUP_9})?(\s?{GROUP_0})?'
 
 class StandardObservation:
     """Data of daily standard single-term observations at the hydrological station for the current day

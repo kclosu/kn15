@@ -157,22 +157,29 @@ class FlowAndSurface:
             return None
 
 
-    def decode(self):
+    def decode_flow(self):
         output = {}
         if self.month is not None:
             output['measure_month'] = self.month
         if self.stage is not None:
-            output['discharge_measure_stage'] = self.stage
+            output['stage'] = self.stage
         if self.flow is not None:
-            output['discharge_measure'] = self.flow
+            output['discharge'] = self.flow
         if self.area is not None:
             output['cross-sectional_area'] = self.area
         if self.depth is not None:
             output['max_water_depth'] = self.depth
         if self.flow_measure_day is not None:
-            output['discharge_measure_day'] = self.flow_measure_day
+            output['measure_day'] = self.flow_measure_day
         if self.flow_measure_time is not None:
-            output['discharge_measure_synophour'] = self.flow_measure_time
+            output['measure_synophour'] = self.flow_measure_time
+
+        return output
+
+    def decode_surface(self):
+        output = {}
+        if self.month is not None:
+            output['measure_month'] = self.month
         if self.wind_direction is not None:
             output['reservoir_wind_direction'] = self.wind_direction
         if self.wind_speed is not None:
@@ -184,8 +191,8 @@ class FlowAndSurface:
         if self.surface_condition is not None:
             output['reservoir_water_surface_condition'] = self.surface_condition
         if self.surface_obser_day is not None:
-            output['surface_observation_day'] = self.surface_obser_day
+            output['measure_day'] = self.surface_obser_day
         if self.surface_obser_time is not None:
-            output['surface_observation_synophour'] = self.surface_obser_time
+            output['measure_synophour'] = self.surface_obser_time
 
         return output

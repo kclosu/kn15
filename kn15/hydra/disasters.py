@@ -7,7 +7,7 @@ GROUP_0 = r'9770(?P<type>\d)'
 GROUP_1 = r'(?P<digital_group>[(0-9\/\)\s]*)'
 GROUP_2 = r'(?P<literal_group>[а-яА-Яa-zA-Z].*)'
 
-SECTION_7 = f'({GROUP_0})\s({GROUP_1})\s({GROUP_2})'
+SECTION_7 = f'({GROUP_0})\s({GROUP_1})?\s({GROUP_2})?'
 
 
 class Disaster:
@@ -51,6 +51,8 @@ class Disaster:
         return self._special_marks
 
     def decode(self):
+        print(self._observation)
+        print(self.observation)
         output = {}
         if self.disaster_type is not None:
             output['disaster_type'] = self.disaster_type

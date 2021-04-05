@@ -12,7 +12,7 @@ GROUP_6 = r'6(?P<group_6>\d{4}|/{4})'
 GROUP_7 = r'7(?P<YY>\d{2})(?P<GG>\d{2})'
 
 SECTION_3 = f'^({GROUP_0})?(\s{GROUP_1})?(\s{GROUP_2})?(\s{GROUP_3})?\
-(\s{GROUP_4})(\s{GROUP_5})?(\s{GROUP_6})?(\s{GROUP_7})?'
+(\s{GROUP_4})?(\s{GROUP_5})?(\s{GROUP_6})?(\s{GROUP_7})?'
 
 
 class StageAndFlow:

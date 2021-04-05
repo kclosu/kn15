@@ -5,14 +5,14 @@ from hydra.stage_and_flow import StageAndFlow
 from hydra.reservoir_stage_and_volume import StageAndVolume
 from hydra.reservoir_inflow import Inflow
 from hydra.reservoir_flow_and_surface import FlowAndSurface
-from hydra.hydra_lib import Error, valid_date, valid_time
+from hydra.hydra_lib import Error, valid_date, valid_time, EMPTY_OUTPUT
 from hydra.disasters import Disaster
 
 report_bounds = re.compile(r'^(.*?)=', re.DOTALL | re.MULTILINE)
 
 IDENTIFIER = r'(?P<basin>\d{2})(?P<station_id>\d{3})'
 MEASURE_TIME = r'(?P<YY>\d{2})(?P<GG>\d{2})(?P<n>[1-5,7])'
-ADDITIONAL_SECTIONS_TAGS = r'9[22|33|44|55|66|77|88]\d{2}'
+ADDITIONAL_SECTIONS_TAGS = r'9[22|33|44|55|66|77]\d{2}'
 
 NullValue = 'NIL'
 
@@ -66,7 +66,7 @@ class KN15():
                 self._reservoir_inflow_daily.append(part)
             if re.match(r'966(\d{2})(\s.*)', part):
                 self._reservoir_flow_and_surface.append(part)
-            if re.match(r'9770[1-5](\s.*)', part):
+            if re.match(r'9770[1-7](\s.*)', part):
                 self._disasters.append(part)
 
         return parsed
@@ -148,6 +148,7 @@ class KN15():
         if day != None:
             out['day_of_month'] = int(day)
             out['synophour'] = 8
+        out.update(EMPTY_OUTPUT)
         return out
 
     def decode(self):
@@ -193,7 +194,12 @@ class KN15():
 
         if self.reservoir_flow_and_surface_period is not None:
             for flow_and_surface in self.reservoir_flow_and_surface_period:
-                body = FlowAndSurface(flow_and_surface).decode()
+                body = FlowAndSurface(flow_and_surface).decode_flow()
+                output = self.prepare_head()
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+                body = FlowAndSurface(flow_and_surface).decode_surface()
                 output = self.prepare_head()
                 if body is not None:
                     output.update(body)

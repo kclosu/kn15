@@ -102,11 +102,11 @@ class Inflow:
         if self.water_area_inflow is not None:
             output['reservoir_water_area_inflow'] = self.water_area_inflow
         if self.prev_total_inflow is not None:
-            output['reservoir_previous_total_inflow'] = self.prev_total_inflow
+            output['reservoir_sum_previous_total_inflow'] = self.prev_total_inflow
         if self.prev_side_inflow is not None:
-            output['reservoir_previous_side_inflow'] = self.prev_side_inflow
+            output['reservoir_sum_previous_side_inflow'] = self.prev_side_inflow
         if self.prev_water_area_inflow is not None:
-            output['reservoir_previous_water_area_inflow'] = self.prev_water_area_inflow
+            output['reservoir_sum_previous_water_area_inflow'] = self.prev_water_area_inflow
         if self.water_discharge is not None:
             output['reservoir_water_discharge'] = self.water_discharge
 

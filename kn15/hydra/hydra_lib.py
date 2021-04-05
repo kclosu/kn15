@@ -1,3 +1,57 @@
+
+EMPTY_OUTPUT = {
+    'stage': None,
+    'change_stage': None,
+    'previous_stage': None,
+    'water_temperature': None,
+    'air_temperature': None,
+    'ice_conditions': None,
+    'water_conditions': None,
+    'ice_thickness': None,
+    'snow_depth': None,
+    'discharge': None,
+    'precipitation_duration_by_half_day': None,
+    'precipitation_amount_by_half_day': None,
+    'precipitation_duration': None,
+    'precipitation_amount': None,
+    'cross-sectional_area': None,
+    'max_water_depth': None,
+    'period': None,
+    'avg_stage': None,
+    'max_stage': None,
+    'min_stage': None,
+    'avg_discharge': None,
+    'max_discharge': None,
+    'min_discharge': None,
+    'day_of_max': None,
+    'hour_of_max': None,
+    'reservoir_upstream_stage': None,
+    'reservoir_avg_stage': None,
+    'reservoir_previous_avg_stage': None,
+    'reservoir_downstream_stage': None,
+    'reservoir_max_downstream_stage': None,
+    'reservoir_min_downstream_stage': None,
+    'reservoir_volume': None,
+    'reservoir_previous_volume': None,
+    'reservoir_total_inflow': None,
+    'reservoir_side_inflow': None,
+    'reservoir_water_area_inflow': None,
+    'reservoir_sum_previous_total_inflow': None,
+    'reservoir_sum_previous_side_inflow': None,
+    'reservoir_sum_previous_water_area_inflow': None,
+    'reservoir_water_discharge': None,
+    'reservoir_wind_direction': None,
+    'reservoir_wind_speed': None,
+    'reservoir_wave_direction': None,
+    'reservoir_wave_depth': None,
+    'reservoir_water_surface_condition': None,
+    'measure_month': None,
+    'measure_day': None,
+    'measure_synophour': None,
+    'disaster_type': None,
+    'special_marks': None
+}
+
 """Section 1 Group 5"""
 ICE_CONDITIONS = {
     11: 'Сало',
@@ -233,9 +287,11 @@ disaster_types = {
 DISASTER_TYPES_SHORT = {
     1: 'высокие уровни воды',
     2: 'низкие уровни воды',
-    3: 'раннее образование ледостава',
-    4: 'очень большие или очень малые расходы воды',
-    5: 'очень сильный дождь'
+    3: 'раннее образование ледостава и появление льда',
+    4: 'очень большие или очень малые расходы воды, приток, сброс',
+    5: 'сильный дождь',
+    6: 'сели',
+    7: 'лавины'
 }
 
 class Error(Exception):
