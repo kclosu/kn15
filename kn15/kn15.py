@@ -1,12 +1,12 @@
 import re
 import click
-from hydra.daily_standard import StandardObservation
-from hydra.stage_and_flow import StageAndFlow
-from hydra.reservoir_stage_and_volume import StageAndVolume
-from hydra.reservoir_inflow import Inflow
-from hydra.reservoir_flow_and_surface import FlowAndSurface
-from hydra.hydra_lib import Error, valid_date, valid_time, EMPTY_OUTPUT
-from hydra.disasters import Disaster
+from .hydra.daily_standard import StandardObservation
+from .hydra.stage_and_flow import StageAndFlow
+from .hydra.reservoir_stage_and_volume import StageAndVolume
+from .hydra.reservoir_inflow import Inflow
+from .hydra.reservoir_flow_and_surface import FlowAndSurface
+from .hydra.hydra_lib import Error, valid_date, valid_time, EMPTY_OUTPUT
+from .hydra.disasters import Disaster
 
 report_bounds = re.compile(r'^(.*?)=', re.DOTALL | re.MULTILINE)
 
@@ -52,24 +52,32 @@ class KN15():
         self._GG = parsed.get('GG')
         self._n = parsed.get('n')
 
-        parts = re.split(fr'\s(?={ADDITIONAL_SECTIONS_TAGS})', self._report[12:])
-        if not re.match(ADDITIONAL_SECTIONS_TAGS, parts[0]):
-            self._standard_daily = parts[0]
-        for part in parts:
-            if re.match(r'922(\d{2})(\s.*)', part):
-                self._previous_standard_daily.append(part)
-            if re.match(r'933(\d{2})(\s.*)', part):
-                self._stage_and_flow.append(part)
-            if re.match(r'944(\d{2})(\s.*)', part):
-                self._reservoir_stage_and_volume_daily.append(part)
-            if re.match(r'955(\d{2})(\s.*)', part):
-                self._reservoir_inflow_daily.append(part)
-            if re.match(r'966(\d{2})(\s.*)', part):
-                self._reservoir_flow_and_surface.append(part)
-            if re.match(r'9770[1-7](\s.*)', part):
-                self._disasters.append(part)
+        if self._n in ['1', '3']:
+            self._standard_daily = self._report[12:]
+
+        else:
+            parts = re.split(fr'\s(?={ADDITIONAL_SECTIONS_TAGS})', self._report[12:])
+            if not re.match(ADDITIONAL_SECTIONS_TAGS, parts[0]):
+                self._standard_daily = parts[0]
+            for part in parts:
+                if re.match(r'922(\d{2})(\s.*)', part):
+                    self._previous_standard_daily.append(part)
+                if re.match(r'933(\d{2})(\s.*)', part):
+                    self._stage_and_flow.append(part)
+                if re.match(r'944(\d{2})(\s.*)', part):
+                    self._reservoir_stage_and_volume_daily.append(part)
+                if re.match(r'955(\d{2})(\s.*)', part):
+                    self._reservoir_inflow_daily.append(part)
+                if re.match(r'966(\d{2})(\s.*)', part):
+                    self._reservoir_flow_and_surface.append(part)
+                if re.match(r'9770[1-7](\s.*)', part):
+                    self._disasters.append(part)
 
         return parsed
+
+    @property
+    def n(self):
+        return int(self._n)
 
     @property
     def identifier(self):
@@ -85,9 +93,7 @@ class KN15():
 
     @property
     def measure_day(self):
-        """measure day of month"""
         return valid_date(self._YY)
-
 
     @property
     def standard_daily(self):
@@ -212,9 +218,8 @@ class KN15():
                 if body is not None:
                     output.update(body)
                 out.append(output)
-                
-        return out
 
+        return out
 
 
 def bulletin_reports(bulletin):
