@@ -1,12 +1,12 @@
 import re
 import click
-from .hydra.daily_standard import StandardObservation
-from .hydra.stage_and_flow import StageAndFlow
-from .hydra.reservoir_stage_and_volume import StageAndVolume
-from .hydra.reservoir_inflow import Inflow
-from .hydra.reservoir_flow_and_surface import FlowAndSurface
-from .hydra.hydra_lib import Error, valid_date, valid_time, EMPTY_OUTPUT
-from .hydra.disasters import Disaster
+from hydra.daily_standard import StandardObservation
+from hydra.stage_and_flow import StageAndFlow
+from hydra.reservoir_stage_and_volume import StageAndVolume
+from hydra.reservoir_inflow import Inflow
+from hydra.reservoir_flow_and_surface import FlowAndSurface
+from hydra.hydra_lib import Error, valid_date, valid_time, EMPTY_OUTPUT
+from hydra.disasters import Disaster
 
 report_bounds = re.compile(r'^(.*?)=', re.DOTALL | re.MULTILINE)
 
