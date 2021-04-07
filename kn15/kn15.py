@@ -1,3 +1,4 @@
+import datetime
 import re
 import click
 from hydra.daily_standard import StandardObservation
@@ -22,9 +23,10 @@ class KN15():
     def parse():
         pass
 
-    def __init__(self, report):
+    def __init__(self, report, ts=1617794080):
         super().__init__()
         self._report = report
+        self._ts = ts
         self._basin = None
         self._station_id = None
         self._YY = None
@@ -40,17 +42,25 @@ class KN15():
         self._parse()
 
     def _parse(self):
+
         identifier = self._report[:5]
         self._basin = identifier[:2]
         self._station_id = identifier[2:]
         measure_time = self._report[6:11]
         match = re.match(MEASURE_TIME, measure_time)
         if match is None:
-            raise Error("Couldn't parse report string with regular expression")
-        parsed = match.groupdict()
-        self._YY = parsed.get('YY')
-        self._GG = parsed.get('GG')
-        self._n = parsed.get('n')
+            if self.get_literal_part() == 'NIL':
+                if self._ts is not None:
+                    self.ts_to_date()
+                else:
+                    return
+            else:
+                raise Error("Couldn't parse report string with regular expression")
+        else:
+            parsed = match.groupdict()
+            self._YY = parsed.get('YY')
+            self._GG = parsed.get('GG')
+            self._n = parsed.get('n')
 
         if self._n in ['1', '3']:
             self._standard_daily = self._report[12:]
@@ -73,7 +83,7 @@ class KN15():
                 if re.match(r'9770[1-7](\s.*)', part):
                     self._disasters.append(part)
 
-        return parsed
+        #return parsed
 
     @property
     def n(self):
@@ -221,12 +231,29 @@ class KN15():
 
         return out
 
+    def get_literal_part(self):
+        """Split '_report' to numeral array and text part (if exist)"""
+        regex = '([(0-9\/\)\s]*)\s([а-яА-Яa-zA-Z].*)'
+        report = self._report
+        if re.search(regex, report):
+            pattern = re.compile(regex)
+            row = pattern.findall(report)
+            marks = row[0][1]
+        else:
+            marks = None
+        return marks
+
+    def ts_to_date(self):
+        """Convert received date to date attributes"""
+        dt = datetime.datetime.fromtimestamp(float(self._ts))
+        self._YY = dt.day
+
 
 def bulletin_reports(bulletin):
     """
     each report in bulletin start with new line and ended with '='
     return iterator for reports in bulletin  
-  """
+    """
     return map(lambda m: re.sub(r"\s+", ' ', m.group(1)).strip(), re.finditer(report_bounds, bulletin))
 
 
@@ -237,13 +264,17 @@ def decode(bulletin):
 
 
 def parse_file(filename):
-    with open(filename, 'r') as f:
-        bulletin = f.read()
-        for report in decode(bulletin):
+    with open(filename, 'r') as file:
+        bulletin = file.read()
+        reports = list(decode(bulletin))
+        print(reports)
+        out = []
+        for report in reports:
             try:
-                return KN15(report).decode()
+                out.append(KN15(report).decode())
             except Exception as ex:
                 print(ex)
+        return out
 
 
 def parse_report(report):
@@ -258,7 +289,8 @@ def parse_report(report):
 @click.option('--report', help='Report string to decode', default=False)
 def parse(filename, report):
     if filename:
-        print(parse_file(filename))
+        for i in parse_file(filename):
+            print(i)
     if report:
         print(parse_report(report))
 
