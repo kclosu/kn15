@@ -23,7 +23,7 @@ class KN15():
     def parse():
         pass
 
-    def __init__(self, report, ts=1617794080):
+    def __init__(self, report, ts=None):
         super().__init__()
         self._report = report
         self._ts = ts
