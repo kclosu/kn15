@@ -10,8 +10,8 @@ GROUP_5 = r'5(?P<group_5>\d{4}|/{4})'
 GROUP_6 = r'6(?P<group_6>\d{4}|/{4})'
 GROUP_7 = r'7(?P<group_7>\d{4}|/{4})'
 
-SECTION_5 = f'^({GROUP_0})?(\s{GROUP_1})?(\s{GROUP_2})?(\s{GROUP_3})?\
-(\s{GROUP_4})(\s{GROUP_5})?(\s{GROUP_6})?(\s{GROUP_7})?'
+SECTION_5 = f'^({GROUP_0})?(\s?{GROUP_1})?(\s?{GROUP_2})?(\s?{GROUP_3})?\
+(\s?{GROUP_4})?(\s?{GROUP_5})?(\s?{GROUP_6})?(\s?{GROUP_7})?'
 
 
 class Inflow:
@@ -33,7 +33,7 @@ class Inflow:
         report = self._report
         match = re.match(SECTION_5, report)
         if match is None:
-            raise Error("Couldn't parse report string with regular expression")
+            raise Error("Couldn't parse section 5 with regular expression")
         parsed = match.groupdict()
         self._YY = parsed.get('YY')
         self._total_inflow = parsed.get('group_1')

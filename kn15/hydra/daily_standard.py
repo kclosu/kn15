@@ -5,11 +5,11 @@ from .hydra_lib import ICE_CONDITIONS, WATER_CONDITIONS, SNOW_DEPTH_SCALE, PRECI
 GROUP_1 = r'1(?P<group_1>\d{4}|/{4})'
 GROUP_2 = r'2(?P<group_2>\d{4}|/{4})'
 GROUP_3 = r'3(?P<group_3>\d{4}|/{4})'
-GROUP_4 = r'4(?P<group_4_part_0>\d{2})(?P<group_4_part_1>\d{2}|/{2})'
-GROUP_5 = r'5(?P<group_5>\d{4})'
-GROUP_6 = r'6(?P<group_6>\d{4})'
-GROUP_7 = r'7(?P<group_7_part_0>\d{3})(?P<group_7_part_1>\d|/)'
-GROUP_8 = r'8(?P<group_8>\d{4})'
+GROUP_4 = r'4(?P<group_4_part_0>\d{2}|/{2})(?P<group_4_part_1>\d{2}|/{2})'
+GROUP_5 = r'5(?P<group_5>\d{4}|/{4})'
+GROUP_6 = r'6(?P<group_6>\d{4}|/{4})'
+GROUP_7 = r'7(?P<group_7_part_0>\d{3}|/{3})(?P<group_7_part_1>\d|/)'
+GROUP_8 = r'8(?P<group_8>\d{4}|/{4})'
 GROUP_9 = r'9(?P<group_9_part_0>\d{3}|/{3})(?P<group_9_part_1>\d|/)'
 GROUP_0 = r'0(?P<group_0_part_0>\d{3}|/{3})(?P<group_0_part_1>\d|/)'
 
@@ -46,7 +46,7 @@ class StandardObservation:
             report = self._report[6:]
         match = re.match(STANDARD_OBSERVATION, report)
         if match is None:
-            raise Error("Couldn't parse report string with regular expression")
+            raise Error("Couldn't parse standard observation with regular expression")
         parsed = match.groupdict()
         self._stage = parsed.get('group_1')
         self._change_stage = parsed.get('group_2')
@@ -99,7 +99,7 @@ class StandardObservation:
     def water_temperature(self):
         """Work incorrect.
         Instruction does not explain different between 1 and 10 in code '10'"""
-        if self._water_temp is not None:
+        if is_not_empty(self._water_temp):
             if self._air_temp is not None and self._air_temp == '99':
                 return int(self._water_temp)
             else:

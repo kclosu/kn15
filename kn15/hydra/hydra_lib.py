@@ -48,8 +48,7 @@ EMPTY_OUTPUT = {
     'measure_month': None,
     'measure_day': None,
     'measure_synophour': None,
-    'disaster_type': None,
-    'special_marks': None
+    'disaster_type': None
 }
 
 """Section 1 Group 5"""

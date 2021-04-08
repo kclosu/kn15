@@ -25,7 +25,7 @@ class Disaster:
         report = self._report
         match = re.match(SECTION_7, report)
         if match is None:
-            raise Error("Couldn't parse report string with regular expression")
+            raise Error("Couldn't parse section 7 with regular expression")
         parsed = match.groupdict()
         self._type = parsed.get('type')
         self._observation = parsed.get('digital_group')

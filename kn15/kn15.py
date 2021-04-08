@@ -9,7 +9,6 @@ from hydra.reservoir_flow_and_surface import FlowAndSurface
 from hydra.hydra_lib import Error, valid_date, valid_time, EMPTY_OUTPUT
 from hydra.disasters import Disaster
 
-report_bounds = re.compile(r'^(.*?)=', re.DOTALL | re.MULTILINE)
 
 IDENTIFIER = r'(?P<basin>\d{2})(?P<station_id>\d{3})'
 MEASURE_TIME = r'(?P<YY>\d{2})(?P<GG>\d{2})(?P<n>[1-5,7])'
@@ -39,6 +38,7 @@ class KN15():
         self._reservoir_inflow_daily = []
         self._reservoir_flow_and_surface = []
         self._disasters = []
+        self._literal_part = None
         self._parse()
 
     def _parse(self):
@@ -49,19 +49,18 @@ class KN15():
         measure_time = self._report[6:11]
         match = re.match(MEASURE_TIME, measure_time)
         if match is None:
-            if self.get_literal_part() == 'NIL':
-                if self._ts is not None:
-                    self.ts_to_date()
-                else:
-                    return
-            else:
-                raise Error("Couldn't parse report string with regular expression")
+            #if self.get_literal_part() in ['NIL', 'nil', 'НИЛ']:
+            if self._ts is not None:
+                self.ts_to_date()
+            #else:
+            #   raise Error("Couldn't parse report string with regular expression")
         else:
             parsed = match.groupdict()
             self._YY = parsed.get('YY')
             self._GG = parsed.get('GG')
             self._n = parsed.get('n')
 
+        self.get_literal_part()
         if self._n in ['1', '3']:
             self._standard_daily = self._report[12:]
 
@@ -159,7 +158,8 @@ class KN15():
             'identifier': self.identifier,
             'basin': self.basin,
             'day_of_month': self.measure_day,
-            'synophour': self.measure_time
+            'synophour': self.measure_time,
+            'special_marks': self._literal_part
         })
         if day != None:
             out['day_of_month'] = int(day)
@@ -238,10 +238,11 @@ class KN15():
         if re.search(regex, report):
             pattern = re.compile(regex)
             row = pattern.findall(report)
-            marks = row[0][1]
+            literal_part = row[0][1]
         else:
-            marks = None
-        return marks
+            literal_part = None
+        self._literal_part = literal_part
+        return literal_part
 
     def ts_to_date(self):
         """Convert received date to date attributes"""
@@ -254,6 +255,7 @@ def bulletin_reports(bulletin):
     each report in bulletin start with new line and ended with '='
     return iterator for reports in bulletin  
     """
+    report_bounds = re.compile(r'((.)*?)=', re.DOTALL | re.MULTILINE)
     return map(lambda m: re.sub(r"\s+", ' ', m.group(1)).strip(), re.finditer(report_bounds, bulletin))
 
 
@@ -264,10 +266,9 @@ def decode(bulletin):
 
 
 def parse_file(filename):
-    with open(filename, 'r') as file:
-        bulletin = file.read()
+    with open(filename, 'rb') as file:
+        bulletin = file.read().decode("koi8-r")
         reports = list(decode(bulletin))
-        print(reports)
         out = []
         for report in reports:
             try:
