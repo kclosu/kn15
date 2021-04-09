@@ -1,13 +1,13 @@
 import datetime
 import re
 import click
-from hydra.daily_standard import StandardObservation
-from hydra.stage_and_flow import StageAndFlow
-from hydra.reservoir_stage_and_volume import StageAndVolume
-from hydra.reservoir_inflow import Inflow
-from hydra.reservoir_flow_and_surface import FlowAndSurface
-from hydra.hydra_lib import Error, valid_date, valid_time, EMPTY_OUTPUT
-from hydra.disasters import Disaster
+from .hydra.daily_standard import StandardObservation
+from .hydra.stage_and_flow import StageAndFlow
+from .hydra.reservoir_stage_and_volume import StageAndVolume
+from .hydra.reservoir_inflow import Inflow
+from .hydra.reservoir_flow_and_surface import FlowAndSurface
+from .hydra.hydra_lib import Error, valid_date, valid_time, EMPTY_OUTPUT
+from .hydra.disasters import Disaster
 
 
 IDENTIFIER = r'(?P<basin>\d{2})(?P<station_id>\d{3})'
@@ -17,7 +17,7 @@ ADDITIONAL_SECTIONS_TAGS = r'9[22|33|44|55|66|77]\d{2}'
 NullValue = 'NIL'
 
 
-class KN15():
+class KN15:
     @staticmethod
     def parse():
         pass
@@ -61,26 +61,26 @@ class KN15():
             self._n = parsed.get('n')
 
         self.get_literal_part()
-        if self._n in ['1', '3']:
-            self._standard_daily = self._report[12:]
+        #if self._n in ['1', '3']:
+        #    self._standard_daily = self._report[12:]
 
-        else:
-            parts = re.split(fr'\s(?={ADDITIONAL_SECTIONS_TAGS})', self._report[12:])
-            if not re.match(ADDITIONAL_SECTIONS_TAGS, parts[0]):
-                self._standard_daily = parts[0]
-            for part in parts:
-                if re.match(r'922(\d{2})(\s.*)', part):
-                    self._previous_standard_daily.append(part)
-                if re.match(r'933(\d{2})(\s.*)', part):
-                    self._stage_and_flow.append(part)
-                if re.match(r'944(\d{2})(\s.*)', part):
-                    self._reservoir_stage_and_volume_daily.append(part)
-                if re.match(r'955(\d{2})(\s.*)', part):
-                    self._reservoir_inflow_daily.append(part)
-                if re.match(r'966(\d{2})(\s.*)', part):
-                    self._reservoir_flow_and_surface.append(part)
-                if re.match(r'9770[1-7](\s.*)', part):
-                    self._disasters.append(part)
+        #else:
+        parts = re.split(fr'\s(?={ADDITIONAL_SECTIONS_TAGS})', self._report[12:])
+        if not re.match(ADDITIONAL_SECTIONS_TAGS, parts[0]):
+            self._standard_daily = parts[0]
+        for part in parts:
+            if re.match(r'922(\d{2})(\s.*)', part):
+                self._previous_standard_daily.append(part)
+            if re.match(r'933(\d{2})(\s.*)', part):
+                self._stage_and_flow.append(part)
+            if re.match(r'944(\d{2})(\s.*)', part):
+                self._reservoir_stage_and_volume_daily.append(part)
+            if re.match(r'955(\d{2})(\s.*)', part):
+                self._reservoir_inflow_daily.append(part)
+            if re.match(r'966(\d{2})(\s.*)', part):
+                self._reservoir_flow_and_surface.append(part)
+            if re.match(r'9770[1-7](\s.*)', part):
+                self._disasters.append(part)
 
         #return parsed
 
@@ -262,7 +262,8 @@ def bulletin_reports(bulletin):
 def decode(bulletin):
     if bulletin.split()[0].upper() != 'HHZZ':
         raise TypeError("Report does not contain HHZZ in first line")
-    return bulletin_reports(bulletin[4:])
+    bulletin = bulletin.replace('HHZZ','')
+    return bulletin_reports(bulletin)
 
 
 def parse_file(filename):

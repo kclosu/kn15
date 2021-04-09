@@ -12,7 +12,7 @@ GROUP_7 = r'7(?P<group_7>\d{4}|/{4})'
 GROUP_8 = r'8(?P<group_8>\d{4}|/{4})'
 
 SECTION_4 = f'^({GROUP_0})?(\s?{GROUP_1})?(\s?{GROUP_2})?(\s?{GROUP_3})?\
-(\s?{GROUP_4})(\s?{GROUP_5})?(\s?{GROUP_6})?(\s?{GROUP_7})?(\s?{GROUP_8})?'
+(\s?{GROUP_4})?(\s?{GROUP_5})?(\s?{GROUP_6})?(\s?{GROUP_7})?(\s?{GROUP_8})?'
 
 
 class StageAndVolume:
