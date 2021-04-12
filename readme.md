@@ -188,13 +188,14 @@ python -m unittest tests.py
 
 ## Использование
 ```
-python kn15/kn15.py --report "10950 31081 16161 20142 30175 499// 56563 56401 61105 61541 70511 80001 99993 09094"
+python parse.py --report "10950 31081 16161 20142 30175 499// 56563 56401 61105 61541 70511 80001 99993 09094"
     [
        {
           'identifier': 10950, 
           'basin': 10, 
           'day_of_month': 31, 
           'synophour': 8, 
+          'special_marks': None
           'stage': -1161, 
           'change_stage': -14,
           'previous_stage': 175, 
@@ -248,14 +249,13 @@ python kn15/kn15.py --report "10950 31081 16161 20142 30175 499// 56563 56401 61
           'measure_day': None, 
           'measure_synophour': None, 
           'disaster_type': None,
-          'special_marks': None
        }
     ]
 ```
 
 Из файла
 ```
-python kn15/kn15.py --filename samples/40.hydra
+python parse.py --filename samples/40.hydra
 {'stage': 189, 'discharge': None, 'ice_thickness': None, 'snow_depth': None, 'precipation_duration': 'менее 1 ч', 'precipation_amount': 0.0, 'air_temperature': None, 'water_temperature': None, 'identifier': '49904', 'basin': '49', 'day_of_month': '28', 'synophour': '08', 'ice_conditions': None}
 ```
 Из кода
