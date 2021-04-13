@@ -190,7 +190,7 @@ class StandardObservation:
             water_status[key].extend(get_status(self._ice_conditions, ICE_CONDITION_MATCHS, MODE_GROUPS, verbose=verbose))
         if len(self._water_conditions) != 0:
             water_status[key].extend(get_status(self._water_conditions, WATER_CONDITION_MATCHS, MODE_GROUPS, verbose=verbose))
-        if water_status == {}:
+        if water_status == {key: []}:
             return None
         return water_status
 

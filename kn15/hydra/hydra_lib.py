@@ -457,6 +457,13 @@ def key_in_dict(key, dict):
         raise Error(f'Dictionary does not contain match for element code {key}')
 
 
+def find_in_dict(atr, dict):
+    for key in dict:
+        if int(atr) in dict[key]:
+            return key
+    return None
+
+
 def get_stage(stage):
     """Return 'stage' according to 'Section 1 Group 1' rules"""
     stage = int(stage)
@@ -503,16 +510,9 @@ def get_conditions(conditions, dict, verbose=False):
     return out
 
 
-def find_in_dict(atr, dict):
-    for key in dict:
-        if int(atr) in dict[key]:
-            return key
-    return None
-
-
 def get_status(conditions, dict, mode_groups, verbose=False):
-    """Parse 'conditions' with conditions dictionary according to 'Section 1 Group 5 (and 6)' rules.
-     Use 'verbose=True' to return conditions title."""
+    """Parse 'water_status' with match dictionary from 'Section 1 Group 5 (and 6)'.
+     Use 'verbose=True' to return title."""
     out = []
     for condition in conditions:
         if is_not_empty(condition):
