@@ -1,6 +1,8 @@
 import re
-from .hydra_lib import Error, is_not_empty, valid_date, get_stage, get_flow, get_conditions, get_scale, get_amount
-from .hydra_lib import ICE_CONDITIONS, WATER_CONDITIONS, SNOW_DEPTH_SCALE, PRECIPITATION_DURATION_SCALE
+from .hydra_lib import Error, is_not_empty, valid_date, get_stage, get_flow, get_conditions, get_scale, get_amount,\
+    get_status
+from .hydra_lib import ICE_CONDITIONS, WATER_CONDITIONS, SNOW_DEPTH_SCALE, PRECIPITATION_DURATION_SCALE, MODE_GROUPS,\
+    ICE_CONDITION_MATCHS, WATER_CONDITION_MATCHS
 
 GROUP_1 = r'1(?P<group_1>\d{4}|/{4})'
 GROUP_2 = r'2(?P<group_2>\d{4}|/{4})'
@@ -178,6 +180,20 @@ class StandardObservation:
         else:
             return None
 
+    @property
+    def water_status(self, verbose=False):
+        key = 'water_status_code'
+        if verbose:
+            key = 'water_status'
+        water_status = {key: []}
+        if len(self._ice_conditions) != 0:
+            water_status[key].extend(get_status(self._ice_conditions, ICE_CONDITION_MATCHS, MODE_GROUPS, verbose=verbose))
+        if len(self._water_conditions) != 0:
+            water_status[key].extend(get_status(self._water_conditions, WATER_CONDITION_MATCHS, MODE_GROUPS, verbose=verbose))
+        if water_status == {}:
+            return None
+        return water_status
+
     def decode(self):
 
         output = {}
@@ -209,5 +225,7 @@ class StandardObservation:
             output['precipitation_duration'] = self.precipitation_duration
         if self.precipitation_amount is not None:
             output['precipitation_amount'] = self.precipitation_amount
+        if self.water_status is not None:
+            output.update(self.water_status)
 
         return output, valid_date(self._YY)
