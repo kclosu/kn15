@@ -1,12 +1,7 @@
 import datetime
 import re
-from .hydra.daily_standard import StandardObservation
-from .hydra.stage_and_flow import StageAndFlow
-from .hydra.reservoir_stage_and_volume import StageAndVolume
-from .hydra.reservoir_inflow import Inflow
-from .hydra.reservoir_flow_and_surface import FlowAndSurface
-from .hydra.hydra_lib import Error, valid_date, valid_time, EMPTY_OUTPUT
-from .hydra.disasters import Disaster
+from .hydra import StandardObservation, StageAndFlow, StageAndVolume, Inflow, FlowAndSurface, Disaster
+from .hydra import Error, valid_date, valid_time, EMPTY_OUTPUT
 
 
 IDENTIFIER = r'(?P<basin>\d{2})(?P<station_id>\d{3})'
@@ -64,7 +59,7 @@ class KN15:
         #    self._standard_daily = self._report[12:]
 
         #else:
-        parts = re.split(fr'\s(?={ADDITIONAL_SECTIONS_TAGS})', self._report[12:])
+        parts = re.split(r'\s(?={ADDITIONAL_SECTIONS_TAGS})', self._report[12:])
         if not re.match(ADDITIONAL_SECTIONS_TAGS, parts[0]):
             self._standard_daily = parts[0]
         for part in parts:
