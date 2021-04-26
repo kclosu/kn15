@@ -10,4 +10,4 @@ from .disasters import Disaster
 from .hydra_lib import Error, valid_date, valid_time, EMPTY_OUTPUT
 
 __version__ = '1.1.0'
-__author__ = 'Ksenia Bataeva'
+__author__ = 'Sergey Fesunov'

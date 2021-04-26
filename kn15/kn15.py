@@ -59,7 +59,7 @@ class KN15:
         #    self._standard_daily = self._report[12:]
 
         #else:
-        parts = re.split(r'\s(?={ADDITIONAL_SECTIONS_TAGS})', self._report[12:])
+        parts = re.split(fr'\s(?={ADDITIONAL_SECTIONS_TAGS})', self._report[12:])
         if not re.match(ADDITIONAL_SECTIONS_TAGS, parts[0]):
             self._standard_daily = parts[0]
         for part in parts:

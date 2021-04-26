@@ -1,6 +1,6 @@
 import unittest
 from kn15.kn15 import KN15, decode
-from kn15.hydra.daily_standard import StandardObservation
+from kn15.hydra import StandardObservation
 
 class TestBulletinSplitMethods(unittest.TestCase):
   def test_split(self):
