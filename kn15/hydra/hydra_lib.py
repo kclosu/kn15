@@ -502,11 +502,28 @@ def get_conditions(conditions, dict, verbose=False):
                         out.append({'title': dict[l_part]})
                     else:
                         out.append({'code': l_part})
-                    if l_part != r_part and key_in_dict(r_part, dict):
+                    if l_part != r_part and r_part != 0 and key_in_dict(r_part, dict):
                         if verbose:
                             out.append({'title': dict[r_part]})
                         else:
                             out.append({'code': r_part})
+    return out
+
+
+def check_ice_conditions(conditions):
+    """Rewrite 'conditions' from 'Section 1 Group 5: if '0000' not return, if '00CC' or 'CC00' return 'CCCC'.
+    """
+    out = []
+    for condition in conditions:
+        if is_not_empty(condition) and condition != '0000':
+            l_part = condition[:2]
+            r_part = condition[2:]
+            if l_part == '00':
+                l_part = r_part
+            if r_part == '00':
+                r_part = l_part
+            condition = l_part + r_part
+            out.append(condition)
     return out
 
 

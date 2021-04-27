@@ -1,6 +1,6 @@
 import re
 from .hydra_lib import Error, is_not_empty, valid_date, get_stage, get_flow, get_conditions, get_scale, get_amount,\
-    get_status
+    get_status, check_ice_condition
 from .hydra_lib import ICE_CONDITIONS, WATER_CONDITIONS, SNOW_DEPTH_SCALE, PRECIPITATION_DURATION_SCALE, MODE_GROUPS,\
     ICE_CONDITION_MATCHS, WATER_CONDITION_MATCHS
 
@@ -119,6 +119,8 @@ class StandardObservation:
 
     @property
     def ice_conditions(self, verbose=True):
+        #  uncomment next line to activate replace "00СС" or "CC00" with "СССС" and delete "0000"
+        #  self._ice_conditions = check_ice_conditions(self._ice_conditions)
         if len(self._ice_conditions) == 0:
             return None
         conditions = get_conditions(self._ice_conditions, ICE_CONDITIONS, verbose=verbose)
