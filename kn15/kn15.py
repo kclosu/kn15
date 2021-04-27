@@ -1,12 +1,7 @@
 import datetime
 import re
-from .hydra.daily_standard import StandardObservation
-from .hydra.stage_and_flow import StageAndFlow
-from .hydra.reservoir_stage_and_volume import StageAndVolume
-from .hydra.reservoir_inflow import Inflow
-from .hydra.reservoir_flow_and_surface import FlowAndSurface
-from .hydra.hydra_lib import Error, valid_date, valid_time, EMPTY_OUTPUT
-from .hydra.disasters import Disaster
+from .hydra import StandardObservation, StageAndFlow, StageAndVolume, Inflow, FlowAndSurface, Disaster
+from .hydra import Error, valid_date, valid_time, EMPTY_OUTPUT
 
 
 IDENTIFIER = r'(?P<basin>\d{2})(?P<station_id>\d{3})'
@@ -89,19 +84,19 @@ class KN15:
 
     @property
     def identifier(self):
-        return int(f'{self._basin}{self._station_id}')
+        return f'{self._basin}{self._station_id}'
 
     @property
     def basin(self):
-        return int(self._basin)
+        return self._basin
 
     @property
     def measure_time(self):
-        return valid_time(self._GG)
+        return str(valid_time(self._GG))
 
     @property
     def measure_day(self):
-        return valid_date(self._YY)
+        return str(valid_date(self._YY))
 
     @property
     def standard_daily(self):
@@ -161,8 +156,8 @@ class KN15:
             'special_marks': self._literal_part
         })
         if day != None:
-            out['day_of_month'] = int(day)
-            out['synophour'] = 8
+            out['day_of_month'] = str(day)
+            out['synophour'] = '8'
         out.update(EMPTY_OUTPUT)
         return out
 
