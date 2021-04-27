@@ -1,6 +1,6 @@
 import re
 from .hydra_lib import Error, is_not_empty, valid_date, get_stage, get_flow, get_conditions, get_scale, get_amount,\
-    get_status, check_ice_condition
+    get_status, check_ice_conditions
 from .hydra_lib import ICE_CONDITIONS, WATER_CONDITIONS, SNOW_DEPTH_SCALE, PRECIPITATION_DURATION_SCALE, MODE_GROUPS,\
     ICE_CONDITION_MATCHS, WATER_CONDITION_MATCHS
 
