@@ -182,7 +182,7 @@ class StandardObservation:
 
     @property
     def water_status(self, verbose=False):
-        key = 'water_status_code'
+        key = 'water_code_status'
         if verbose:
             key = 'water_status'
         water_status = {key: []}

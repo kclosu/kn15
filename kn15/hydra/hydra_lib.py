@@ -13,7 +13,7 @@ EMPTY_OUTPUT = {
     'precipitation_amount_by_half_day': None,
     'precipitation_duration': None,
     'precipitation_amount': None,
-    'water_status_code': None,
+    'water_code_status': None,
     'cross-sectional_area': None,
     'max_water_depth': None,
     'period': None,
