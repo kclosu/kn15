@@ -166,7 +166,7 @@ class FlowAndSurface:
         if self.flow is not None:
             output['discharge'] = self.flow
         if self.area is not None:
-            output['cross-sectional_area'] = self.area
+            output['cross_sectional_area'] = self.area
         if self.depth is not None:
             output['max_water_depth'] = self.depth
         if self.flow_measure_day is not None:

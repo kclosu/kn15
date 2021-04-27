@@ -14,7 +14,7 @@ EMPTY_OUTPUT = {
     'precipitation_duration': None,
     'precipitation_amount': None,
     'water_code_status': None,
-    'cross-sectional_area': None,
+    'cross_sectional_area': None,
     'max_water_depth': None,
     'period': None,
     'avg_stage': None,
