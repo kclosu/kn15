@@ -35,6 +35,9 @@ class KN15:
         self._literal_part = None
         self._parse()
 
+    def __repr__(self):
+        return(self._report)
+
     def _parse(self):
 
         identifier = self._report[:5]
