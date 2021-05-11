@@ -5,7 +5,7 @@ from .hydra import Error, valid_date, valid_time, EMPTY_OUTPUT
 
 
 IDENTIFIER = r'(?P<basin>\d{2})(?P<station_id>\d{3})'
-MEASURE_TIME = r'(?P<YY>\d{2})(?P<GG>\d{2})(?P<n>[1-5,7])'
+MEASURE_TIME = r'(?P<YY>(0[1-9]|[12][0-9]|3[01]))(?P<GG>([01][0-9]|2[0-3]))(?P<n>\d)'
 ADDITIONAL_SECTIONS_TAGS = r'9[22|33|44|55|66|77]\d{2}'
 
 NullValue = 'NIL'
@@ -46,11 +46,8 @@ class KN15:
         measure_time = self._report[6:11]
         match = re.match(MEASURE_TIME, measure_time)
         if match is None:
-            #if self.get_literal_part() in ['NIL', 'nil', 'НИЛ']:
             if self._ts is not None:
                 self.ts_to_date()
-            #else:
-            #   raise Error("Couldn't parse report string with regular expression")
         else:
             parsed = match.groupdict()
             self._YY = parsed.get('YY')
@@ -58,10 +55,6 @@ class KN15:
             self._n = parsed.get('n')
 
         self.get_literal_part()
-        #if self._n in ['1', '3']:
-        #    self._standard_daily = self._report[12:]
-
-        #else:
         parts = re.split(fr'\s(?={ADDITIONAL_SECTIONS_TAGS})', self._report[12:])
         if not re.match(ADDITIONAL_SECTIONS_TAGS, parts[0]):
             self._standard_daily = parts[0]
@@ -79,10 +72,12 @@ class KN15:
             if re.match(r'9770[1-7](\s.*)', part):
                 self._disasters.append(part)
 
-        #return parsed
 
     @property
     def n(self):
+        match = re.match(r'[1-5,7]', self._n)
+        if match is None:
+            return None
         return int(self._n)
 
     @property
@@ -95,10 +90,14 @@ class KN15:
 
     @property
     def measure_time(self):
+        if self._GG is None:
+            return None
         return str(valid_time(self._GG))
 
     @property
     def measure_day(self):
+        if self._YY is None:
+            return None
         return str(valid_date(self._YY))
 
     @property
