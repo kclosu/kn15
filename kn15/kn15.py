@@ -254,11 +254,28 @@ def bulletin_reports(bulletin):
     report_bounds = re.compile(r'((.)*?)=', re.DOTALL | re.MULTILINE)
     return map(lambda m: re.sub(r"\s+", ' ', m.group(1)).strip(), re.finditer(report_bounds, bulletin))
 
+def clean(string, artifacts='\x0f\x0e'):
+    """Input sometimes contain unvisible artifacts (\x0f, \x0e)
+    which deleted by this function. 
+    Set 'artifacts' to delete other artifacts."""
+    encoding = 'koi8-r'
+    artifacts = [ord(x) for x in artifacts]
+    byte_string = string.encode(encoding)
+    out_byte_string = byte_string
+    for i in range(len(byte_string)):
+        if byte_string[i] in artifacts:
+            for j in range(len(out_byte_string)):
+                if out_byte_string[j] == byte_string[i]:
+                    out_byte_string = out_byte_string[:j] + out_byte_string[j+1:]
+                    break
+    return out_byte_string.decode(encoding)
 
 def decode(bulletin):
-    if bulletin.split()[0].upper() != 'HHZZ':
-        raise TypeError("Report does not contain HHZZ in first line")
+    bulletin = clean(bulletin)
+    header = bulletin.split()[0].upper()
+    if header != 'HHZZ':
+        raise TypeError(f'Report does not contain HHZZ in first line. "{header}" was received .')
     bulletin = bulletin.replace('HHZZ','')
-    return bulletin_reports(bulletin)
+    return  bulletin_reports(bulletin)
 
 
