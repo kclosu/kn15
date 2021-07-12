@@ -25,10 +25,10 @@
 ```
 __GROUP_0__
 
-  'identifier' - индекс гидрологического поста <int>
-  'basin' - номер бассейна реки, в котором расположен пост <int>
-  'day_of_month' - дата наблюдений <int>
-  'synophour' - срок наблюдений <int>
+  'identifier' - индекс гидрологического поста <string>
+  'basin' - номер бассейна реки, в котором расположен пост <string>
+  'day_of_month' - дата наблюдений <string>
+  'synophour' - срок наблюдений <string>
   
 __GROUP_1__
 
@@ -53,11 +53,13 @@ __GROUP_1__
 (от 08 ч до 20 ч местного времени предыдущего дня подачи телеграммы), мм <int>
   'precipitation_amount_by_half_day' - общая продолжительность выпадения осадков за половину 
 суток (от 08ч до 20ч местного времени предыдущего дня подачи телеграммы), час <string>
-  'precipitation_duration' -количество осадков в миллиметрах, выпавших за сутки (от 08ч 
+  'precipitation_duration' - количество осадков в миллиметрах, выпавших за сутки (от 08ч 
 местного времени предыдущего дня до 08 ч дня подачи телеграммы), мм <int>
-  'precipitation_amount' -общая продолжительность выпадения осадков за сутки (от 08ч местного 
+  'precipitation_amount' - общая продолжительность выпадения осадков за сутки (от 08ч местного 
 времени предыдущего дня до 08ч дня подачи телеграммы), час <string>
-  'cross-sectional_area' - площадь живого сечения реки, м2 <float> 
+  'water_code_status' - номер режимной  группы явлений (в соответствии с характеристиками
+ледовых явлений и состоянием водного объекта), [<int>] 
+  'cross_sectional_area' - площадь живого сечения реки, м2 <float> 
   'max_water_depth' - максимальная глубина на гидростворе, см <int> 
 
 __GROUP_2__
@@ -256,7 +258,10 @@ python parse.py --report "10950 31081 16161 20142 30175 499// 56563 56401 61105 
 Из файла
 ```
 python parse.py --filename samples/40.hydra
-{'stage': 189, 'discharge': None, 'ice_thickness': None, 'snow_depth': None, 'precipation_duration': 'менее 1 ч', 'precipation_amount': 0.0, 'air_temperature': None, 'water_temperature': None, 'identifier': '49904', 'basin': '49', 'day_of_month': '28', 'synophour': '08', 'ice_conditions': None}
+[{'identifier': 49904, 'basin': 49, 'day_of_month': 28, 'synophour': 8, 'special_marks': None, 'stage': 189, 'change_stage': 2, 'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None, 'water_conditions': [{'title': 'Чисто'}], 'ice_thickness': None, 'snow_depth': None, 'discharge': None, 'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None, 'precipitation_duration': 'менее 1 ч', 'precipitation_amount': 0.0, 'cross-sectional_area': None, 'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None, 'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None, 'reservoir_upstream_stage': None, 'reservoir_avg_stage': None, 'reservoir_previous_avg_stage': None, 'reservoir_downstream_stage': None, 'reservoir_max_downstream_stage': None, 'reservoir_min_downstream_stage': None, 'reservoir_volume': None, 'reservoir_previous_volume': None, 'reservoir_total_inflow': None, 'reservoir_side_inflow': None, 'reservoir_water_area_inflow': None, 'reservoir_sum_previous_total_inflow': None, 'reservoir_sum_previous_side_inflow': None, 'reservoir_sum_previous_water_area_inflow': None, 'reservoir_water_discharge': None, 'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None, 'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None, 'measure_day': None, 'measure_synophour': None, 'disaster_type': None}]
+[{'identifier': 49907, 'basin': 49, 'day_of_month': 28, 'synophour': 8, 'special_marks': None, 'stage': 187, 'change_stage': 4, 'previous_stage': None, 'water_temperature': 2.4, 'air_temperature': 8, 'ice_conditions': [{'title': 'Лед относит (отнесло) от берега - для озер, водохранилищ'}], 'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None, 'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None, 'precipitation_duration': 'от 6 до 12 ч', 'precipitation_amount': 1.0, 'cross-sectional_area': None, 'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None, 'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None, 'reservoir_upstream_stage': None, 'reservoir_avg_stage': None, 'reservoir_previous_avg_stage': None, 'reservoir_downstream_stage': None, 'reservoir_max_downstream_stage': None, 'reservoir_min_downstream_stage': None, 'reservoir_volume': None, 'reservoir_previous_volume': None, 'reservoir_total_inflow': None, 'reservoir_side_inflow': None, 'reservoir_water_area_inflow': None, 'reservoir_sum_previous_total_inflow': None, 'reservoir_sum_previous_side_inflow': None, 'reservoir_sum_previous_water_area_inflow': None, 'reservoir_water_discharge': None, 'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None, 'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None, 'measure_day': None, 'measure_synophour': None, 'disaster_type': None}]
+[{'identifier': 49001, 'basin': 49, 'day_of_month': 28, 'synophour': 8, 'special_marks': None, 'stage': 194, 'change_stage': 1, 'previous_stage': None, 'water_temperature': 6.8, 'air_temperature': None, 'ice_conditions': None, 'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None, 'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None, 'precipitation_duration': 'от 1 до 3 ч', 'precipitation_amount': 0.0, 'cross-sectional_area': None, 'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None, 'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None, 'reservoir_upstream_stage': None, 'reservoir_avg_stage': None, 'reservoir_previous_avg_stage': None, 'reservoir_downstream_stage': None, 'reservoir_max_downstream_stage': None, 'reservoir_min_downstream_stage': None, 'reservoir_volume': None, 'reservoir_previous_volume': None, 'reservoir_total_inflow': None, 'reservoir_side_inflow': None, 'reservoir_water_area_inflow': None, 'reservoir_sum_previous_total_inflow': None, 'reservoir_sum_previous_side_inflow': None, 'reservoir_sum_previous_water_area_inflow': None, 'reservoir_water_discharge': None, 'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None, 'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None, 'measure_day': None, 'measure_synophour': None, 'disaster_type': None}]
+
 ```
 Из кода
 ```

@@ -12,7 +12,7 @@ GROUP_6 = r'6(?P<group_6_part_0>\d{2})(?P<group_6_part_1>\d{2})'
 GROUP_7 = r'7(?P<group_7_part_0>\d)(?P<group_7_part_1>\d{2})(?P<group_7_part_2>\d)'
 GROUP_8 = r'8(?P<group_8_YY>\d{2})(?P<group_8_GG>\d{2})'
 
-SECTION_4 = f'^({GROUP_0})?(\s?{GROUP_1})?(\s?{GROUP_2})?(\s?{GROUP_3})?\
+SECTION_6 = f'^({GROUP_0})?(\s?{GROUP_1})?(\s?{GROUP_2})?(\s?{GROUP_3})?\
 (\s?{GROUP_4})?(\s?{GROUP_5})?(\s?{GROUP_6})?(\s?{GROUP_7})?(\s?{GROUP_8})?'
 
 
@@ -39,7 +39,7 @@ class FlowAndSurface:
 
     def _parse(self):
         report = self._report
-        match = re.match(SECTION_4, report)
+        match = re.match(SECTION_6, report)
         if match is None:
             raise Error("Couldn't parse section 6 with regular expression")
         parsed = match.groupdict()
@@ -166,7 +166,7 @@ class FlowAndSurface:
         if self.flow is not None:
             output['discharge'] = self.flow
         if self.area is not None:
-            output['cross-sectional_area'] = self.area
+            output['cross_sectional_area'] = self.area
         if self.depth is not None:
             output['max_water_depth'] = self.depth
         if self.flow_measure_day is not None:
