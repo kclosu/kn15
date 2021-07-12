@@ -17,11 +17,8 @@ class TestBulletinSplitMethods(unittest.TestCase):
 
 class KN15Match(unittest.TestCase):
   def test(self):
-    s = '10950 31082 16161 20142 30175 499// 56563 56401 61105 61541 70511 80001 99994 09090\
- 92230 10101 20142 30175 499// 56563 56401 61105 61541 705V11 80001 99894 09090\
- 92229 10101 20142 30175 499// 56563 56401 61105 61541 70511 80001 99894 09090\
- 92228 15140 20142 30175 499// 56563 56401 61105 61541 70511 80001 99894 09090'
-    self.assertEqual(KN15(s).identifier, 10950)
+    s = '10950 31082 16161 20142 30175 499// 56563 56401 61105 61541 70511 80001 99994 09090 92230 10101 20142 30175 499// 56563 56401 61105 61541 705V11 80001 99894 09090 92229 10101 20142 30175 499// 56563 56401 61105 61541 70511 80001 99894 09090 92228 15140 20142 30175 499// 56563 56401 61105 61541 70511 80001 99894 09090'
+    self.assertEqual(KN15(s).identifier, '10950')
     self.assertEqual(KN15(s).standard_daily, '16161 20142 30175 499// 56563 56401 61105 61541 70511 80001 99994 09090')
     self.assertEqual(KN15(s).previous_standard_daily, [
       '92230 10101 20142 30175 499// 56563 56401 61105 61541 705V11 80001 99894 09090',
@@ -35,14 +32,14 @@ class TestDateAndTime(unittest.TestCase):
   def test_day_of_month(self):
     s = '05001 29081 10202 20212 30210 44103'
     report = KN15(s)
-    self.assertEqual(report.measure_day, 29)
+    self.assertEqual(report.measure_day, '29')
 
 class TestIdentifier(unittest.TestCase):
   def test_identifier(self):
     s = '11085 94411 10503 20508 40193 73145 95511 24115 44265 74254'
-    self.assertEqual(KN15(s).identifier, 11085)
+    self.assertEqual(KN15(s).identifier, '11085')
     s = '41001 04081 15009 48303'
-    self.assertEqual(KN15(s).identifier, 41001)
+    self.assertEqual(KN15(s).identifier, '41001')
 
 
 class TestDecode(unittest.TestCase):
@@ -141,9 +138,9 @@ class TestCondition(unittest.TestCase):
                                                              {'title': 'Залом леса ниже поста'},
                                                              {
                                                                'title': 'Русло реки сужено на гидростворе для измерения расхода воды'}])
-    self.assertEqual(StandardObservation(s).water_status, {'water_status_code': [16, 15, 36, 37, 38]})
+    self.assertEqual(StandardObservation(s).water_status, {'water_code_status': [16, 15, 36, 37, 38]})
     s = '51113 51903 51904 54854 66222 63545'
-    self.assertEqual(StandardObservation(s).water_status, {'water_status_code': [1, 2, 4, 5, 13, 30, 31, 38]})
+    self.assertEqual(StandardObservation(s).water_status, {'water_code_status': [1, 2, 4, 5, 13, 30, 31, 38]})
 
   def test_exception(self):
     s = '92222 52727'
@@ -164,7 +161,7 @@ class TestReport(unittest.TestCase):
   def test_standard(self):
     s = '10950 31081 16161 20142 30175 499// 56563 56401 61105 61541 70511 80001 99993 09094'
     self.assertEqual(KN15(s).decode(), [
-      {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8,
+      {'identifier': '10950', 'basin': '10', 'day_of_month': '31', 'synophour': '8',
        'special_marks': None, 'stage': -1161, 'change_stage': -14,
        'previous_stage': 175, 'water_temperature': 9.9, 'air_temperature': None,
        'ice_conditions': [{'title': 'Ледостав, ровный ледяной покров'}, {'title': 'Ледостав неполный'},
@@ -174,7 +171,7 @@ class TestReport(unittest.TestCase):
        'ice_thickness': 51, 'snow_depth': 'менее 5 см', 'discharge': 0.001,
        'precipitation_duration_by_half_day': 'от 6 до 12 ч', 'precipitation_amount_by_half_day': 0.9,
        'precipitation_duration': 'более 12 ч', 'precipitation_amount': 909.0, 
-       'water_status_code': [16, 15, 36, 37, 38], 'cross-sectional_area': None,
+       'water_code_status': [16, 15, 36, 37, 38], 'cross_sectional_area': None,
        'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
        'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None,
        'reservoir_upstream_stage': None, 'reservoir_avg_stage': None, 'reservoir_previous_avg_stage': None,
@@ -192,13 +189,13 @@ class TestReport(unittest.TestCase):
 
     s = '10950 31081 11161 20141 35175 46405 51112 60000 70999 89999 90203 03304'
     self.assertEqual(KN15(s).decode(), [
-      {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8, 'special_marks': None, 'stage': 1161,
+      {'identifier': '10950', 'basin': '10', 'day_of_month': '31', 'synophour': '8', 'special_marks': None, 'stage': 1161,
        'change_stage': 14, 'previous_stage': -175, 'water_temperature': 6.4, 'air_temperature': 5,
        'ice_conditions': [{'title': 'Сало'}, {'title': 'Снежура'}], 'water_conditions': [{'title': 'Чисто'}],
        'ice_thickness': 99, 'snow_depth': 'больше 70 см', 'discharge': 999000000.0,
        'precipitation_duration_by_half_day': 'от 6 до 12 ч', 'precipitation_amount_by_half_day': 20.0,
        'precipitation_duration': 'более 12 ч', 'precipitation_amount': 330.0, 
-       'water_status_code': [1, 7, 29], 'cross-sectional_area': None,
+       'water_code_status': [1, 7, 29], 'cross_sectional_area': None,
        'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
        'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None,
        'reservoir_upstream_stage': None, 'reservoir_avg_stage': None, 'reservoir_previous_avg_stage': None,
@@ -226,14 +223,14 @@ class TestReport(unittest.TestCase):
  96603 11200 21300 31250 41345 53008 60000 70001 82908'
 
     self.assertEqual(KN15(s).decode(), [
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 30, 'synophour': 8, 'special_marks': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '30', 'synophour': '8', 'special_marks': None,
          'stage': 101, 'change_stage': -14,
          'previous_stage': 175, 'water_temperature': 20, 'air_temperature': None,
          'ice_conditions': [{'title': 'Ледостав, ровный ледяной покров'}, {'title': 'Ледостав неполный'}],
          'water_conditions': [{'title': 'Лесосплав', 'intensity': 50}], 'ice_thickness': 51, 'snow_depth': 'менее 5 см',
          'discharge': 0.001, 'precipitation_duration_by_half_day': 'от 6 до 12 ч',
          'precipitation_amount_by_half_day': 989.0, 'precipitation_duration': 'менее 1 ч',
-         'precipitation_amount': 909.0, 'water_status_code': [16, 15, 36], 'cross-sectional_area': None, 
+         'precipitation_amount': 909.0, 'water_code_status': [16, 15, 36], 'cross_sectional_area': None, 
          'max_water_depth': None, 'period': None,
          'avg_stage': None, 'max_stage': None, 'min_stage': None, 'avg_discharge': None, 'max_discharge': None,
          'min_discharge': None, 'day_of_max': None, 'hour_of_max': None, 'reservoir_upstream_stage': None,
@@ -246,14 +243,14 @@ class TestReport(unittest.TestCase):
          'reservoir_wave_direction': None, 'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None,
          'measure_month': None, 'measure_day': None, 'measure_synophour': None, 'disaster_type': None
          },
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 29, 'synophour': 8, 'special_marks': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '29', 'synophour': '8', 'special_marks': None,
          'stage': 101, 'change_stage': -14,
          'previous_stage': 175, 'water_temperature': 20, 'air_temperature': None,
          'ice_conditions': [{'title': 'Ледостав, ровный ледяной покров'}, {'title': 'Ледостав неполный'}],
          'water_conditions': [{'title': 'Лесосплав', 'intensity': 50}], 'ice_thickness': 51, 'snow_depth': 'менее 5 см',
          'discharge': 0.001, 'precipitation_duration_by_half_day': 'от 6 до 12 ч',
          'precipitation_amount_by_half_day': 989.0, 'precipitation_duration': 'менее 1 ч',
-         'precipitation_amount': 909.0, 'water_status_code': [16, 15, 36], 'cross-sectional_area': None, 
+         'precipitation_amount': 909.0, 'water_code_status': [16, 15, 36], 'cross_sectional_area': None, 
          'max_water_depth': None, 'period': None,
          'avg_stage': None, 'max_stage': None, 'min_stage': None, 'avg_discharge': None, 'max_discharge': None,
          'min_discharge': None, 'day_of_max': None, 'hour_of_max': None, 'reservoir_upstream_stage': None,
@@ -266,14 +263,14 @@ class TestReport(unittest.TestCase):
          'reservoir_wave_direction': None, 'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None,
          'measure_month': None, 'measure_day': None, 'measure_synophour': None, 'disaster_type': None
          },
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 28, 'synophour': 8,
-         'special_marks': None, 'stage': -140, 'change_stage': -14,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '28', 'synophour': '8', 'special_marks': None,
+         'stage': -140, 'change_stage': -14,
          'previous_stage': 175, 'water_temperature': 20, 'air_temperature': None,
          'ice_conditions': [{'title': 'Ледостав, ровный ледяной покров'}, {'title': 'Ледостав неполный'}],
          'water_conditions': [{'title': 'Лесосплав', 'intensity': 50}], 'ice_thickness': 51, 'snow_depth': 'менее 5 см',
          'discharge': 0.001, 'precipitation_duration_by_half_day': 'от 6 до 12 ч',
          'precipitation_amount_by_half_day': 989.0, 'precipitation_duration': 'менее 1 ч',
-         'precipitation_amount': 909.0, 'water_status_code': [16, 15, 36], 'cross-sectional_area': None, 
+         'precipitation_amount': 909.0, 'water_code_status': [16, 15, 36], 'cross_sectional_area': None, 
          'max_water_depth': None, 'period': None,
          'avg_stage': None, 'max_stage': None, 'min_stage': None, 'avg_discharge': None, 'max_discharge': None,
          'min_discharge': None, 'day_of_max': None, 'hour_of_max': None, 'reservoir_upstream_stage': None,
@@ -285,14 +282,14 @@ class TestReport(unittest.TestCase):
          'reservoir_water_discharge': None, 'reservoir_wind_direction': None, 'reservoir_wind_speed': None,
          'reservoir_wave_direction': None, 'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None,
          'measure_month': None, 'measure_day': None, 'measure_synophour': None, 'disaster_type': None},
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 27, 'synophour': 8,
-         'special_marks': None, 'stage': -140, 'change_stage': -14,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '27', 'synophour': '8', 'special_marks': None,
+         'stage': -140, 'change_stage': -14,
          'previous_stage': 175, 'water_temperature': 20, 'air_temperature': None,
          'ice_conditions': [{'title': 'Ледостав, ровный ледяной покров'}, {'title': 'Ледостав неполный'}],
          'water_conditions': [{'title': 'Лесосплав', 'intensity': 50}], 'ice_thickness': 51, 'snow_depth': 'менее 5 см',
          'discharge': 0.001, 'precipitation_duration_by_half_day': 'от 6 до 12 ч',
          'precipitation_amount_by_half_day': 989.0, 'precipitation_duration': 'менее 1 ч',
-         'precipitation_amount': 909.0, 'water_status_code': [16, 15, 36], 'cross-sectional_area': None, 
+         'precipitation_amount': 909.0, 'water_code_status': [16, 15, 36], 'cross_sectional_area': None, 
          'max_water_depth': None, 'period': None,
          'avg_stage': None, 'max_stage': None, 'min_stage': None, 'avg_discharge': None, 'max_discharge': None,
          'min_discharge': None, 'day_of_max': None, 'hour_of_max': None, 'reservoir_upstream_stage': None,
@@ -304,12 +301,12 @@ class TestReport(unittest.TestCase):
          'reservoir_water_discharge': None, 'reservoir_wind_direction': None, 'reservoir_wind_speed': None,
          'reservoir_wave_direction': None, 'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None,
          'measure_month': None, 'measure_day': None, 'measure_synophour': None, 'disaster_type': None},
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8, 'special_marks': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '31', 'synophour': '8', 'special_marks': None,
          'stage': None, 'change_stage': None,
          'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
          'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None,
          'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-         'precipitation_duration': None, 'precipitation_amount': None, 'water_status_code': None, 'cross-sectional_area': None,
+         'precipitation_duration': None, 'precipitation_amount': None, 'water_code_status': None, 'cross_sectional_area': None,
          'max_water_depth': None, 'period': 'за месяц', 'avg_stage': 140, 'max_stage': 142, 'min_stage': 175,
          'avg_discharge': 9.9, 'max_discharge': 16.3, 'min_discharge': 10.5, 'day_of_max': 12, 'hour_of_max': 11,
          'reservoir_upstream_stage': None, 'reservoir_avg_stage': None, 'reservoir_previous_avg_stage': None,
@@ -321,12 +318,12 @@ class TestReport(unittest.TestCase):
          'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None,
          'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None,
          'measure_day': None, 'measure_synophour': None, 'disaster_type': None},
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8, 'special_marks': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '31', 'synophour': '8', 'special_marks': None,
          'stage': None, 'change_stage': None,
          'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
          'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None,
          'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-         'precipitation_duration': None, 'precipitation_amount': None, 'water_status_code': None, 'cross-sectional_area': None,
+         'precipitation_duration': None, 'precipitation_amount': None, 'water_code_status': None, 'cross_sectional_area': None,
          'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
          'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None,
          'reservoir_upstream_stage': 1200, 'reservoir_avg_stage': 1300, 'reservoir_previous_avg_stage': 1250,
@@ -338,12 +335,12 @@ class TestReport(unittest.TestCase):
          'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None,
          'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None,
          'measure_day': None, 'measure_synophour': None, 'disaster_type': None},
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 30, 'synophour': 8, 'special_marks': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '30', 'synophour': '8', 'special_marks': None,
          'stage': None, 'change_stage': None,
          'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
          'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None,
          'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-         'precipitation_duration': None, 'precipitation_amount': None, 'water_status_code': None, 'cross-sectional_area': None,
+         'precipitation_duration': None, 'precipitation_amount': None, 'water_code_status': None, 'cross_sectional_area': None,
          'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
          'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None,
          'reservoir_upstream_stage': 1200, 'reservoir_avg_stage': 1300, 'reservoir_previous_avg_stage': 1250,
@@ -355,12 +352,12 @@ class TestReport(unittest.TestCase):
          'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None,
          'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None,
          'measure_day': None, 'measure_synophour': None, 'disaster_type': None},
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 29, 'synophour': 8, 'special_marks': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '29', 'synophour': '8', 'special_marks': None,
          'stage': None, 'change_stage': None,
          'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
          'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None,
          'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-         'precipitation_duration': None, 'precipitation_amount': None, 'water_status_code': None, 'cross-sectional_area': None,
+         'precipitation_duration': None, 'precipitation_amount': None, 'water_code_status': None, 'cross_sectional_area': None,
          'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
          'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None,
          'reservoir_upstream_stage': 1200, 'reservoir_avg_stage': 1300, 'reservoir_previous_avg_stage': 1250,
@@ -372,12 +369,12 @@ class TestReport(unittest.TestCase):
          'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None,
          'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None,
          'measure_day': None, 'measure_synophour': None, 'disaster_type': None},
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8, 'special_marks': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '31', 'synophour': '8', 'special_marks': None,
          'stage': None, 'change_stage': None,
          'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
          'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None,
          'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-         'precipitation_duration': None, 'precipitation_amount': None, 'water_status_code': None, 'cross-sectional_area': None,
+         'precipitation_duration': None, 'precipitation_amount': None, 'water_code_status': None, 'cross_sectional_area': None,
          'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
          'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None,
          'reservoir_upstream_stage': None, 'reservoir_avg_stage': None, 'reservoir_previous_avg_stage': None,
@@ -389,12 +386,12 @@ class TestReport(unittest.TestCase):
          'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None,
          'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None,
          'measure_day': None, 'measure_synophour': None, 'disaster_type': None},
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 30, 'synophour': 8, 'special_marks': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '30', 'synophour': '8', 'special_marks': None,
          'stage': None, 'change_stage': None,
          'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
          'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None,
          'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-         'precipitation_duration': None, 'precipitation_amount': None, 'water_status_code': None, 'cross-sectional_area': None,
+         'precipitation_duration': None, 'precipitation_amount': None, 'water_code_status': None, 'cross_sectional_area': None,
          'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
          'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None,
          'reservoir_upstream_stage': None, 'reservoir_avg_stage': None, 'reservoir_previous_avg_stage': None,
@@ -406,12 +403,12 @@ class TestReport(unittest.TestCase):
          'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None,
          'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None,
          'measure_day': None, 'measure_synophour': None, 'disaster_type': None},
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 29, 'synophour': 8, 'special_marks': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '29', 'synophour': '8', 'special_marks': None,
          'stage': None, 'change_stage': None,
          'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
          'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None,
          'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-         'precipitation_duration': None, 'precipitation_amount': None, 'water_status_code': None, 'cross-sectional_area': None,
+         'precipitation_duration': None, 'precipitation_amount': None, 'water_code_status': None, 'cross_sectional_area': None,
          'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
          'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None,
          'reservoir_upstream_stage': None, 'reservoir_avg_stage': None, 'reservoir_previous_avg_stage': None,
@@ -423,12 +420,12 @@ class TestReport(unittest.TestCase):
          'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None,
          'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None,
          'measure_day': None, 'measure_synophour': None, 'disaster_type': None},
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8, 'special_marks': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '31', 'synophour': '8', 'special_marks': None,
          'stage': 1200, 'change_stage': None,
          'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
          'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': 3.0,
          'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-         'precipitation_duration': None, 'precipitation_amount': None, 'water_status_code': None, 'cross-sectional_area': 2.5,
+         'precipitation_duration': None, 'precipitation_amount': None, 'water_code_status': None, 'cross_sectional_area': 2.5,
          'max_water_depth': 1345, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
          'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None,
          'reservoir_upstream_stage': None, 'reservoir_avg_stage': None, 'reservoir_previous_avg_stage': None,
@@ -440,12 +437,12 @@ class TestReport(unittest.TestCase):
          'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None,
          'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': 3, 'measure_day': 30,
          'measure_synophour': 8, 'disaster_type': None},
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8, 'special_marks': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '31', 'synophour': '8', 'special_marks': None,
          'stage': None, 'change_stage': None,
          'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
          'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None,
          'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-         'precipitation_duration': None, 'precipitation_amount': None, 'water_status_code': None, 'cross-sectional_area': None,
+         'precipitation_duration': None, 'precipitation_amount': None, 'water_code_status': None, 'cross_sectional_area': None,
          'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
          'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None, 'hour_of_max': None,
          'reservoir_upstream_stage': None, 'reservoir_avg_stage': None, 'reservoir_previous_avg_stage': None,
@@ -459,10 +456,10 @@ class TestReport(unittest.TestCase):
          'measure_month': 3, 'measure_day': 29, 'measure_synophour': 8, 'disaster_type': None}]
           )
 
-    s = '10950 31082 97701 11000 22002 51606 61105 РАЗМЫТА НАСЫПЬ ПОДЪЕМ ПРОДОЛЖАЕТСЯ 97702 15200 22001 66064 ЗАСУХА 97703 10600 56565 ОПАСНОСТЬ ДЛЯ СУДОВ 97704 89100 ПРОРЫВ ПЛОТИНЫ 97705 02004 СИЛЬНЫЙ ДОЖДЬ 97706 ПРОШЕЛ СЕЛЬ 97707 ОЖИДАЕТСЯ СХОД ЛАВИН'
+    s = '10950 30087 97701 11000 22002 51606 61105 РАЗМЫТА НАСЫПЬ ПОДЪЕМ ПРОДОЛЖАЕТСЯ 97702 15200 22001 66064 ЗАСУХА 97703 10600 56565 ОПАСНОСТЬ ДЛЯ СУДОВ 97704 89100 ПРОРЫВ ПЛОТИНЫ 97705 02004 СИЛЬНЫЙ ДОЖДЬ 97706 ПРОШЕЛ СЕЛЬ 97707 ОЖИДАЕТСЯ СХОД ЛАВИН'
 
     self.assertEqual(KN15(s).decode(), [
-        {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '30', 'synophour': '8', 
         'special_marks': 'РАЗМЫТА НАСЫПЬ ПОДЪЕМ ПРОДОЛЖАЕТСЯ', 'stage': 1000, 'change_stage': -200,
         'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': [
               {'title': 'Ледоход; для озер, водохранилищ - дрейф льда; снегоход - для пересыхающих рек',
@@ -470,7 +467,7 @@ class TestReport(unittest.TestCase):
         'water_conditions': [{'title': 'Лесосплав', 'intensity': 50}], 'ice_thickness': None, 'snow_depth': None,
         'discharge': None, 'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
         'precipitation_duration': None, 'precipitation_amount': None, 
-         'water_status_code': [9, 36], 'cross-sectional_area': None,
+         'water_code_status': [9, 36], 'cross_sectional_area': None,
         'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
         'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None,
         'hour_of_max': None,
@@ -483,14 +480,14 @@ class TestReport(unittest.TestCase):
         'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None,
         'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None,
         'measure_day': None, 'measure_synophour': None, 'disaster_type': 'высокие уровни воды'},
-       {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '30', 'synophour': '8', 
         'special_marks': 'ЗАСУХА', 'stage': -200, 'change_stage': 200,
         'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
         'water_conditions': [{'title': 'Река пересохла'},
                              {'title': 'Стоячая вода (перемерз или пересох расположенный выше или ниже перекат)'}],
         'ice_thickness': None, 'snow_depth': None, 'discharge': None, 'precipitation_duration_by_half_day': None,
         'precipitation_amount_by_half_day': None, 'precipitation_duration': None, 'precipitation_amount': None,
-        'water_status_code': [39, 33], 'cross-sectional_area': None, 'max_water_depth': None, 
+        'water_code_status': [39, 33], 'cross_sectional_area': None, 'max_water_depth': None, 
         'period': None, 'avg_stage': None, 'max_stage': None,
         'min_stage': None, 'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None,
         'hour_of_max': None, 'reservoir_upstream_stage': None, 'reservoir_avg_stage': None,
@@ -502,13 +499,13 @@ class TestReport(unittest.TestCase):
         'reservoir_water_discharge': None, 'reservoir_wind_direction': None, 'reservoir_wind_speed': None,
         'reservoir_wave_direction': None, 'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None,
         'measure_month': None, 'measure_day': None, 'measure_synophour': None, 'disaster_type': 'низкие уровни воды'},
-       {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8, 'special_marks': 'ОПАСНОСТЬ ДЛЯ СУДОВ',
-        'stage': 600, 'change_stage': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '30', 'synophour': '8', 
+        'special_marks': 'ОПАСНОСТЬ ДЛЯ СУДОВ', 'stage': 600, 'change_stage': None,
         'previous_stage': None, 'water_temperature': None, 'air_temperature': None,
         'ice_conditions': [{'title': 'Ледостав, ровный ледяной покров'}], 'water_conditions': None,
         'ice_thickness': None, 'snow_depth': None, 'discharge': None, 'precipitation_duration_by_half_day': None,
         'precipitation_amount_by_half_day': None, 'precipitation_duration': None, 'precipitation_amount': None,
-        'water_status_code': [16], 'cross-sectional_area': None, 'max_water_depth': None, 
+        'water_code_status': [16], 'cross_sectional_area': None, 'max_water_depth': None, 
         'period': None, 'avg_stage': None, 'max_stage': None,
         'min_stage': None, 'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None,
         'hour_of_max': None, 'reservoir_upstream_stage': None, 'reservoir_avg_stage': None,
@@ -521,12 +518,12 @@ class TestReport(unittest.TestCase):
         'reservoir_wave_direction': None, 'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None,
         'measure_month': None, 'measure_day': None, 'measure_synophour': None,
         'disaster_type': 'раннее образование ледостава и появление льда'},
-       {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '30', 'synophour': '8', 
         'special_marks': 'ПРОРЫВ ПЛОТИНЫ', 'stage': None, 'change_stage': None,
         'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
         'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': 100000000.0,
         'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-        'precipitation_duration': None, 'precipitation_amount': None, 'water_status_code': None, 'cross-sectional_area': None,
+        'precipitation_duration': None, 'precipitation_amount': None, 'water_code_status': None, 'cross_sectional_area': None,
         'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
         'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None,
         'hour_of_max': None,
@@ -540,12 +537,12 @@ class TestReport(unittest.TestCase):
         'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None,
         'measure_day': None, 'measure_synophour': None,
         'disaster_type': 'очень большие или очень малые расходы воды, приток, сброс'},
-       {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '30', 'synophour': '8', 
         'special_marks': 'СИЛЬНЫЙ ДОЖДЬ', 'stage': None, 'change_stage': None,
         'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
         'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None,
         'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-        'precipitation_duration': 'более 12 ч', 'precipitation_amount': 200.0, 'water_status_code': None, 'cross-sectional_area': None,
+        'precipitation_duration': 'более 12 ч', 'precipitation_amount': 200.0, 'water_code_status': None, 'cross_sectional_area': None,
         'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
         'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None,
         'hour_of_max': None,
@@ -558,12 +555,12 @@ class TestReport(unittest.TestCase):
         'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None,
         'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None,
         'measure_day': None, 'measure_synophour': None, 'disaster_type': 'сильный дождь'},
-       {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8, 'special_marks': 'ПРОШЕЛ СЕЛЬ',
-        'stage': None, 'change_stage': None,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '30', 'synophour': '8', 
+        'special_marks': 'ПРОШЕЛ СЕЛЬ', 'stage': None, 'change_stage': None,
         'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
         'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None,
         'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-        'precipitation_duration': None, 'precipitation_amount': None, 'water_status_code': None, 'cross-sectional_area': None,
+        'precipitation_duration': None, 'precipitation_amount': None, 'water_code_status': None, 'cross_sectional_area': None,
         'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
         'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None,
         'hour_of_max': None,
@@ -576,12 +573,12 @@ class TestReport(unittest.TestCase):
         'reservoir_wind_direction': None, 'reservoir_wind_speed': None, 'reservoir_wave_direction': None,
         'reservoir_wave_depth': None, 'reservoir_water_surface_condition': None, 'measure_month': None,
         'measure_day': None, 'measure_synophour': None, 'disaster_type': 'сели'},
-       {'identifier': 10950, 'basin': 10, 'day_of_month': 31, 'synophour': 8,
+        {'identifier': '10950', 'basin': '10', 'day_of_month': '30', 'synophour': '8', 
         'special_marks': 'ОЖИДАЕТСЯ СХОД ЛАВИН', 'stage': None, 'change_stage': None,
         'previous_stage': None, 'water_temperature': None, 'air_temperature': None, 'ice_conditions': None,
         'water_conditions': None, 'ice_thickness': None, 'snow_depth': None, 'discharge': None,
         'precipitation_duration_by_half_day': None, 'precipitation_amount_by_half_day': None,
-        'precipitation_duration': None, 'precipitation_amount': None, 'water_status_code': None, 'cross-sectional_area': None,
+        'precipitation_duration': None, 'precipitation_amount': None, 'water_code_status': None, 'cross_sectional_area': None,
         'max_water_depth': None, 'period': None, 'avg_stage': None, 'max_stage': None, 'min_stage': None,
         'avg_discharge': None, 'max_discharge': None, 'min_discharge': None, 'day_of_max': None,
         'hour_of_max': None,
