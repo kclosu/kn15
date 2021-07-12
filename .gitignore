@@ -1,3 +1,4 @@
 .DS_Stores
 __pycache__/
 errors/
+.vscode/
