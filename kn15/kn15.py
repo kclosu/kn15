@@ -5,13 +5,20 @@ from .hydra import Error, valid_date, valid_time, EMPTY_OUTPUT
 
 
 IDENTIFIER = r'(?P<basin>\d{2})(?P<station_id>\d{3})'
-MEASURE_TIME = r'(?P<YY>(0[1-9]|[12][0-9]|3[01]))(?P<GG>([01][0-9]|2[0-3]))(?P<n>\d)'
+MEASURE_TIME = r'(?P<YY>\d{2})(?P<GG>\d{2})(?P<n>\d)'
+MEASURE_TIME_WITH_CHECK = r'(?P<YY>(0[1-9]|[12][0-9]|3[01]))(?P<GG>([01][0-9]|2[0-3]))(?P<n>\d)'
 ADDITIONAL_SECTIONS_TAGS = r'9[22|33|44|55|66|77]\d{2}'
 
-NullValue = 'NIL'
+NullValue = ['NIL', 'NUL', 'НИЛ']
 
 
 class KN15:
+    """Class to parse telegrams in KN15 code.
+    Take single telegramm. Gives time as unix-timestemp from
+    massages brocker to set date in empty massanges.
+    Return array of dictionaries.
+    """
+
     @staticmethod
     def parse():
         pass
@@ -38,39 +45,56 @@ class KN15:
     def __repr__(self):
         return(self._report)
 
+    def _check_report(self, empty_error=False):
+        """Report must contain at least 'identifier' (1 group of 5 digits).
+        Report is empty if it contain only Null Value."""
+        if self._report[:3].upper() in NullValue:
+            if empty_error:
+                raise Error(f'Empty report: {self._report}')
+            else:
+                return False
+        if len(self._report) < 5:
+            raise Error(f'Report must contain at least one group of 5 symbols. {len(self._report)} is got.')
+        match = re.match(r'\d{5}', self._report[:5])
+        if match is None:
+            raise Error(f'Incorect format of "identifier" in "{self._report[:5]}". Must contain digits only.')
+        return True
+
     def _parse(self):
 
-        identifier = self._report[:5]
-        self._basin = identifier[:2]
-        self._station_id = identifier[2:]
-        measure_time = self._report[6:11]
-        match = re.match(MEASURE_TIME, measure_time)
-        if match is None:
-            if self._ts is not None:
-                self.ts_to_date()
-        else:
-            parsed = match.groupdict()
-            self._YY = parsed.get('YY')
-            self._GG = parsed.get('GG')
-            self._n = parsed.get('n')
+        if self._check_report():
 
-        self.get_literal_part()
-        parts = re.split(fr'\s(?={ADDITIONAL_SECTIONS_TAGS})', self._report[12:])
-        if not re.match(ADDITIONAL_SECTIONS_TAGS, parts[0]):
-            self._standard_daily = parts[0]
-        for part in parts:
-            if re.match(r'922(\d{2})(\s.*)', part):
-                self._previous_standard_daily.append(part)
-            if re.match(r'933(\d{2})(\s.*)', part):
-                self._stage_and_flow.append(part)
-            if re.match(r'944(\d{2})(\s.*)', part):
-                self._reservoir_stage_and_volume_daily.append(part)
-            if re.match(r'955(\d{2})(\s.*)', part):
-                self._reservoir_inflow_daily.append(part)
-            if re.match(r'966(\d{2})(\s.*)', part):
-                self._reservoir_flow_and_surface.append(part)
-            if re.match(r'9770[1-7](\s.*)', part):
-                self._disasters.append(part)
+            identifier = self._report[:5]
+            self._basin = identifier[:2]
+            self._station_id = identifier[2:]
+            measure_time = self._report[6:11]
+            match = re.match(MEASURE_TIME, measure_time)
+            if match is None:
+                if self._ts is not None:
+                    self.ts_to_date()
+            else:
+                parsed = match.groupdict()
+                self._YY = parsed.get('YY')
+                self._GG = parsed.get('GG')
+                self._n = parsed.get('n')
+
+            self.get_literal_part()
+            parts = re.split(fr'\s(?={ADDITIONAL_SECTIONS_TAGS})', self._report[12:])
+            if not re.match(ADDITIONAL_SECTIONS_TAGS, parts[0]):
+                self._standard_daily = parts[0]
+            for part in parts:
+                if re.match(r'922(\d{2})(\s.*)', part):
+                    self._previous_standard_daily.append(part)
+                if re.match(r'933(\d{2})(\s.*)', part):
+                    self._stage_and_flow.append(part)
+                if re.match(r'944(\d{2})(\s.*)', part):
+                    self._reservoir_stage_and_volume_daily.append(part)
+                if re.match(r'955(\d{2})(\s.*)', part):
+                    self._reservoir_inflow_daily.append(part)
+                if re.match(r'966(\d{2})(\s.*)', part):
+                    self._reservoir_flow_and_surface.append(part)
+                if re.match(r'9770[1-7](\s.*)', part):
+                    self._disasters.append(part)
 
 
     @property
@@ -82,11 +106,15 @@ class KN15:
 
     @property
     def identifier(self):
-        return f'{self._basin}{self._station_id}'
+        return f'{self.basin}{self.station_id}'
 
     @property
     def basin(self):
         return self._basin
+
+    @property
+    def station_id(self):
+        return self._station_id
 
     @property
     def measure_time(self):
@@ -157,7 +185,7 @@ class KN15:
             'synophour': self.measure_time,
             'special_marks': self._literal_part
         })
-        if day != None:
+        if day is not None:
             out['day_of_month'] = str(day)
             out['synophour'] = '8'
         out.update(EMPTY_OUTPUT)
@@ -271,11 +299,13 @@ def clean(string, artifacts='\x0f\x0e'):
     return out_byte_string.decode(encoding)
 
 def decode(bulletin):
+    """First line sometimes contain additional symbols after 'HHZZ'.
+    First line is deleted fully."""
     bulletin = clean(bulletin)
     header = bulletin.split()[0].upper()
     if header != 'HHZZ':
         raise TypeError(f'Report does not contain HHZZ in first line. "{header}" was received .')
-    bulletin = bulletin.replace('HHZZ','')
+    bulletin = re.sub(r'.*[\n|\r]', '', bulletin, 1)
     return  bulletin_reports(bulletin)
 
 
