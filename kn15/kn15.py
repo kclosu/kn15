@@ -1,404 +1,311 @@
+import datetime
 import re
-import click
-
-report_bounds = re.compile(r'^(.*?)=', re.DOTALL | re.MULTILINE)
-
-identifier = r'(?P<basin>\d{2})(?P<station_id>\d{3})'
-measure_time = r'(?P<YY>\d{2})(?P<GG>\d{2})(?P<n>[1-5,7])'
-stage = r'1(?P<stage>\d{4}|/{4})'
-change_stage = r'2(?P<change_stage>\d{3}|/{3})(?P<change_stage_sign>\d|/)'
-previous_stage = r'3(?P<prev_stage>\d{4}|/{4})'
-temperature = r'4(?P<water_temp>\d{2})(?P<air_temp>\d{2}|/{2})'
-ice = r'5(?P<ice>\d{4})'
-water_condition = r'6(?P<water_condition>\d{4})'
-ice_thickness = r'7(?P<ice_thickness>\d{3})(?P<snow_depth>\d)'
-discharge = r'8(?P<discharge_integer_part>\d)(?P<discharge>\d{3})'
-precipitation = r'0(?P<precip_amount>\d{3}|/{2})(?P<precip_duration>\d|/{2})'
-
-standart_observation = f'(\s{stage})?(\s{change_stage})?(\s{previous_stage})?(\s{temperature})?(\s{ice})*(\s{water_condition})?(\s{ice_thickness})?(\s{discharge})?(\s{precipitation})?'
-
-report_pattern = f'^{measure_time}{standart_observation}'
-
-# print(report_pattern)
-
-additional_sections_tags = r'9[22|33|44|55|66|77|88]\d{2}'
-
-previous_days = r'922(\d{2})'
-flow = r'933(\d{2})(\s.*)'
-pool_stage = r'944(\d{2})(\s.*)'
-pool_flow = r'955(\d{2})(\s.*)'
-flow_detail = r'966(\d{2})(\s.*)'
-disasters = r'97701(\s.*)97702(\s.*)97703(\s.*)97704(\s.*)97705(\s.*)97706(\s.*)97707(\s.*)'
-
-NullValue = 'NIL'
+from .hydra import StandardObservation, StageAndFlow, StageAndVolume, Inflow, FlowAndSurface, Disaster
+from .hydra import Error, valid_date, valid_time, EMPTY_OUTPUT
 
 
-snow_depth_scale = [
-  "На льду снега нет",
-  "менее 5 см",
-  "5-10 см",
-  "11-15 см",
-  "16-20 см",
-  "21-25 см",
-  "26-35 см",
-  "36-50 см",
-  "51-70 см",
-  "больше 70 см"
-]
+IDENTIFIER = r'(?P<basin>\d{2})(?P<station_id>\d{3})'
+MEASURE_TIME = r'(?P<YY>\d{2})(?P<GG>\d{2})(?P<n>\d)'
+MEASURE_TIME_WITH_CHECK = r'(?P<YY>(0[1-9]|[12][0-9]|3[01]))(?P<GG>([01][0-9]|2[0-3]))(?P<n>\d)'
+ADDITIONAL_SECTIONS_TAGS = r'9[22|33|44|55|66|77]\d{2}'
 
-precipitation_duration_scale = [
-  "менее 1 ч",
-  "от 1 до 3 ч",
-  "от 3 до 6 ч",
-  "от 6 до 12 ч",
-  "более 12 ч"
-]
-
-ice_conditions = [
-    'Сало',
-    'Снежура',
-    'Забереги (первичные; наносные); припай шириной менее 100 м - для озер,водохранилищ',
-    'Припай шириной более 100 м - для озер, водохранилищ',
-    'Забереги нависшие',
-    '*Ледоход; для озер, водохранилищ - дрейф льда; снегоход - для пересыхающих рек',
-    '*Ледоход, лед из притока, озера, водохранилища',
-    '*Ледоход поверх ледяного покрова',
-    '*Шугоход',
-    'Внутриводный лед (донный; глубинный)',
-    'Пятры',
-    'Осевший лед (на береговой отмели после понижения уровня)',
-    'Навалы льда на берегах (ледяные валы)',
-    'Ледяная перемычка в створе поста',
-    'Ледяная перемычка выше поста',
-    'Ледяная перемычка ниже поста',
-    'Затор льда выше поста',
-    'Затор льда ниже поста',
-    'Затор льда искусственно разрушается',
-    'Зажор льда выше поста',
-    'Зажор льда ниже поста',
-    'Зажор льда искусственно разрушается',
-    'Вода на льду',
-    'Вода течет поверх льда (после промерзания реки; при наличии воды подо льдом)',
-    '*Закраины',
-    'Лед потемнел',
-    'Снежница',
-    'Лед подняло (вспучило)',
-    'Подвижка льда',
-    'Разводья',
-    'Лед тает на месте',
-    '*Забереги остаточные',
-    'Наслуд',
-    '*Битый лед - для озер, водохранилищ, устьевых участков рек',
-    '*Блинчатый лед - для озер, водохранилищ, устьевых участков рек',
-    '*Ледяные поля - для озер, водохранилищ, устьевых участков рек',
-    '*Ледяная каша - для озер, водохранилищ, устьевых участков рек',
-    'Стамуха',
-    'Лед относит (отнесло) от берега - для озер, водохранилищ',
-    'Лед прижимает (прижало) к берегу - для озер, водохранилищ',
-    '*Ледостав неполный',
-    '*Ледяной покров с полыньями (промоинами, пропаринами)',
-    'Ледостав, ровный ледяной покров',
-    'Ледостав, ледяной покров с торосами',
-    'Ледяной покров с грядами торосов - для водохранилищ',
-    'Шуговая дорожка',
-    'Подо льдом шуга',
-    'Трещины в ледяном покрове',
-    'Наледь',
-    'Лед нависший(ледяной мост)',
-    'Лед ярусный (ледяной покров состоит из отдельных слоев,между которыми находится вода или воздушная п',
-    'Лед на дне (осевший или вследствие предшествующего промерзания реки)',
-    'Река (озеро) промерзла',
-    'Лед искусственно разрушен (ледоколом, взрыванием и др.техническими средствами',
-    'Наледная вода',
-    'Чисто',
-    '*Лесосплав',
-    'Залом леса выше поста',
-    'Залом леса ниже поста',
-    '*Растительность у берега',
-    '*Растительность по всему сечению потока',
-    '*Растительность по сечению потока пятнами',
-    'Растительность стелется по дну',
-    'Растительность на гидростворе выкошена',
-    'Растительность легла на дно (осенью)',
-    'Растительность занесена илом (во время спуска рыбных прудов и т.д.).',
-    'Растительность погибла в результате загрязнения реки',
-    'Обвал (оползень) берега в створе поста',
-    'Обвал (оползень) берега выше поста',
-    'Обвал (оползень) берега ниже поста',
-    'Дноуглубительные работы в русле',
-    'Намывные работы в русле',
-    'Проведена расчистка русла',
-    'Русло реки сужено на гидростворе для измерения расхода воды',
-    'Образовалась коса',
-    'Коса',
-    'Образовался осередок',
-    'Осередок',
-    'Образовался остров',
-    'Остров',
-    'Смещение русла в плане',
-    'Снежный завал в створе поста',
-    'Снежный завал выше поста',
-    'Снежный завал ниже поста',
-    'Прорыв снежного завала',
-    'Прохождение селя',
-    'Течение реки изменилось на противоположное',
-    'Сгон воды - для устьевых участков рек, озер, водохранилищ',
-    'Нагон воды - для устьевых участков рек, озер, водохранилищ',
-    'Река пересохла',
-    'Волнение слабое, 1 балл - для больших рек, озер, водохранилищ',
-    'Волнение умеренное, 2-3 балла - для больших рек, озер, водохранилищ',
-    'Волнение сильное, более 4 баллов - для больших рек, озер, водохранилищ',
-    'Стоячая вода (перемерз или пересох расположенный выше или ниже перекат)',
-    'Стоячая вода подо льдом',
-    'Прекратилась лодочная переправа',
-    'Прекратилось пешее сообщение',
-    'Началось пешее сообщение',
-    'Началось движение транспорта по льду',
-    'Прекратилось движение транспорта по льду',
-    'Началась лодочная переправа',
-    'Подпор от озера, реки',
-    'Начало навигации',
-    'Конец навигации',
-    'Забор воды выше поста',
-    'Забор воды ниже поста',
-    'Забор воды выше поста прекратился',
-    'Забор воды ниже поста прекратился',
-    'Сброс воды выше поста',
-    'Сброс воды ниже поста',
-    'Сброс воды выше поста прекратился',
-    'Сброс воды ниже поста прекратился',
-    'Плотина (перемычка, запруда, дамба) выше поста',
-    'Плотина (перемычка, запруда, дамба) ниже поста',
-    'Разрушена плотина (перемычка, запруда, дамба) выше поста',
-    'Разрушена плотина (перемычка, запруда, дамба) ниже поста',
-    'Подпор от засорения русла',
-    'Подпор от мостовых переправ',
-    'Пропуски воды из озера, водохранилищ'
-]
-
-class KN15Error(Exception):
-    """Class for exceptions raised when parsing report string"""
-    pass
-
-class KN15():
-  @staticmethod
-  def parse():
-    pass
-
-  def __init__(self, report):
-    super().__init__()
-    self._report = report
-    self._basin = None
-    self._station_id = None
-    self._YY = None
-    self._GG = None
-    self._n = None
-    self._stage = None
-    self._change_stage = None
-    self._change_stage_sign = None
-    self._prev_stage = None
-    self._water_temp = None
-    self._air_temp = None
-    self._ice = None
-    self._water_condition = None
-    self._ice_thickness = None
-    self._snow_depth = None
-    self._discharge_integer_part = None
-    self._discharge = None
-    self._precip_amount = None
-    self._precip_duration = None
-    self._parse()
-
-  def _parse(self):
-    identifier = self._report[:5]
-    self._basin = identifier[:2]
-    self._station_id = identifier[2:]
-    parts = re.split(fr'\s(?={additional_sections_tags})', self._report[6:])
-    if not re.match(additional_sections_tags, parts[0]):
-      match = re.match(report_pattern, parts[0])
-      if match is None:
-        raise KN15Error("Couldn't parse report string with regular expression")
-      parsed = match.groupdict()
-      self._YY = parsed.get('YY')
-      self._GG = parsed.get('GG')
-      self._n = parsed.get('n')
-      self._stage = parsed.get('stage')
-      self._change_stage = parsed.get('change_stage')
-      self._change_stage_sign = parsed.get('change_stage_sign')
-      self._prev_stage = parsed.get('prev_stage')
-      self._water_temp = parsed.get('water_temp')
-      self._air_temp = parsed.get('air_temp')
-      self._ice = parsed.get('ice')
-      self._water_condition = parsed.get('water_condition')
-      self._ice_thickness = parsed.get('ice_thickness')
-      self._snow_depth = parsed.get('snow_depth')
-      self._discharge_integer_part = parsed.get('discharge_integer_part')
-      self._discharge = parsed.get('discharge')
-      self._precip_amount = parsed.get('precip_amount')
-      self._precip_duration = parsed.get('precip_duration')
-
-      return parsed
+NullValue = ['NIL', 'NUL', 'НИЛ']
 
 
-
-  @property
-  def identifier(self):
-    return f'{self._basin}{self._station_id}'
-
-  @property
-  def basin(self):
-    return self._basin
-
-  @property
-  def measure_time(self):
-    if self._GG and not 0 <= int(self._GG) <= 23: raise KN15Error(f'Time of measure {self._GG} is not between 00 and 23')
-    return self._GG
-  
-  @property
-  def ice_conditions(self):
-    if not self._ice:
-      return None
-    conditions = [{
-      'title': ice_conditions[int(self._ice[:2])-11],
-      'intensity': None
-    }]
-    second2digits = int(self._ice[2:])
-    if second2digits < 11:
-      conditions[0]['intensity'] = second2digits * 10
-    else:
-      conditions.append({
-        'title': ice_conditions[second2digits-11],
-        'intensity': None
-      })
-    return conditions
-
-  @property
-  def measure_day(self):
+class KN15:
+    """Class to parse telegrams in KN15 code.
+    Take single telegramm. Gives time as unix-timestemp from
+    massages brocker to set date in empty massanges.
+    Return array of dictionaries.
     """
-    measure day of month
-    """
-    if self._YY and not 1 <= int(self._YY) <= 31: raise KN15Error(f'Day of month {self._YY} is not between 1 and 31')
-    return self._YY
 
-  @property
-  def stage(self):
-    if self._stage is not None:
-      stage = int(self._stage)
-      return stage if stage < 5000 else (5000 - stage)
-    else:
-      return None
+    @staticmethod
+    def parse():
+        pass
 
-  @property
-  def discharge(self):
-    if self._discharge is not None:
-      return float(self._discharge) * pow(10, int(self._discharge_integer_part) - 3)
-    else:
-      return None
+    def __init__(self, report, ts=None):
+        super().__init__()
+        self._report = report
+        self._ts = ts
+        self._basin = None
+        self._station_id = None
+        self._YY = None
+        self._GG = None
+        self._n = None
+        self._standard_daily = None
+        self._previous_standard_daily = []
+        self._stage_and_flow = []
+        self._reservoir_stage_and_volume_daily = []
+        self._reservoir_inflow_daily = []
+        self._reservoir_flow_and_surface = []
+        self._disasters = []
+        self._literal_part = None
+        self._parse()
 
-  @property
-  def ice_thickness(self):
-    if self._ice_thickness:
-      return int(self._ice_thickness)
-    else:
-      return None
+    def __repr__(self):
+        return(self._report)
 
-  @property
-  def snow_depth(self):
-    if self._snow_depth is not None:
-      return snow_depth_scale[int(self._snow_depth)]
-    else:
-      return None
+    def _check_report(self, empty_error=False):
+        """Report must contain at least 'identifier' (1 group of 5 digits).
+        Report is empty if it contain only Null Value."""
+        if self._report[:3].upper() in NullValue:
+            if empty_error:
+                raise Error(f'Empty report: {self._report}')
+            else:
+                return False
+        if len(self._report) < 5:
+            raise Error(f'Report must contain at least one group of 5 symbols. {len(self._report)} is got.')
+        match = re.match(r'\d{5}', self._report[:5])
+        if match is None:
+            raise Error(f'Incorect format of "identifier" in "{self._report[:5]}". Must contain digits only.')
+        return True
 
-  @property
-  def water_temperature(self):
-    if self._water_temp is not None:
-      return int(self._water_temp) / 10
-    else:
-      return None
+    def _parse(self):
 
-  @property
-  def air_temperature(self):
-    if self._air_temp is not None and self._air_temp not in ('//', '99'):
-      air_temp = int(self._air_temp)
-      return air_temp if air_temp < 50 else (50 - air_temp)
-    else:
-      return None
+        if self._check_report():
 
-  @property
-  def precipitation_duration(self):
-    if self._precip_duration is not None:
-      return precipitation_duration_scale[int(self._precip_duration)]
-    else:
-      return None
+            identifier = self._report[:5]
+            self._basin = identifier[:2]
+            self._station_id = identifier[2:]
+            measure_time = self._report[6:11]
+            match = re.match(MEASURE_TIME, measure_time)
+            if match is None:
+                if self._ts is not None:
+                    self.ts_to_date()
+            else:
+                parsed = match.groupdict()
+                self._YY = parsed.get('YY')
+                self._GG = parsed.get('GG')
+                self._n = parsed.get('n')
 
-  @property
-  def precipitation_amount(self):
-    if self._precip_amount is not None:
-      precip_amount = float(self._precip_amount)
-      return precip_amount if precip_amount < 990 else (precip_amount - 990)/10
-    else:
-      return None
+            self.get_literal_part()
+            parts = re.split(fr'\s(?={ADDITIONAL_SECTIONS_TAGS})', self._report[12:])
+            if not re.match(ADDITIONAL_SECTIONS_TAGS, parts[0]):
+                self._standard_daily = parts[0]
+            for part in parts:
+                if re.match(r'922(\d{2})(\s.*)', part):
+                    self._previous_standard_daily.append(part)
+                if re.match(r'933(\d{2})(\s.*)', part):
+                    self._stage_and_flow.append(part)
+                if re.match(r'944(\d{2})(\s.*)', part):
+                    self._reservoir_stage_and_volume_daily.append(part)
+                if re.match(r'955(\d{2})(\s.*)', part):
+                    self._reservoir_inflow_daily.append(part)
+                if re.match(r'966(\d{2})(\s.*)', part):
+                    self._reservoir_flow_and_surface.append(part)
+                if re.match(r'9770[1-7](\s.*)', part):
+                    self._disasters.append(part)
 
-  def decode(self):
-    return {
-      'stage': self.stage,
-      'discharge': self.discharge,
-      'ice_thickness': self.ice_thickness,
-      'snow_depth': self.snow_depth,
-      'precipitation_duration': self.precipitation_duration,
-      'precipitation_amount': self.precipitation_amount,
-      'air_temperature': self.air_temperature,
-      'water_temperature': self.water_temperature,
-      'identifier': self.identifier,
-      'basin': self.basin,
-      'day_of_month': self.measure_day,
-      'synophour': self.measure_time,
-      'ice_conditions': self.ice_conditions
-    }
+
+    @property
+    def n(self):
+        match = re.match(r'[1-5,7]', self._n)
+        if match is None:
+            return None
+        return int(self._n)
+
+    @property
+    def identifier(self):
+        return f'{self.basin}{self.station_id}'
+
+    @property
+    def basin(self):
+        return self._basin
+
+    @property
+    def station_id(self):
+        return self._station_id
+
+    @property
+    def measure_time(self):
+        if self._GG is None:
+            return None
+        return str(valid_time(self._GG))
+
+    @property
+    def measure_day(self):
+        if self._YY is None:
+            return None
+        return str(valid_date(self._YY))
+
+    @property
+    def standard_daily(self):
+        if self._standard_daily is not None:
+            return self._standard_daily
+        else:
+            return None
+
+    @property
+    def previous_standard_daily(self):
+        if len(self._previous_standard_daily) > 0:
+            return self._previous_standard_daily
+        else:
+            return None
+
+    @property
+    def stage_and_flow(self):
+        if len(self._stage_and_flow) > 0:
+            return self._stage_and_flow
+        else:
+            return None
+
+    @property
+    def reservoir_stage_and_volume_daily(self):
+        if len(self._reservoir_stage_and_volume_daily) > 0:
+            return self._reservoir_stage_and_volume_daily
+        else:
+            return None
+
+    @property
+    def reservoir_inflow_daily(self):
+        if len(self._reservoir_inflow_daily) > 0:
+            return self._reservoir_inflow_daily
+        else:
+            return None
+
+    @property
+    def reservoir_flow_and_surface_period(self):
+        if len(self._reservoir_flow_and_surface) > 0:
+            return self._reservoir_flow_and_surface
+        else:
+            return None
+
+    @property
+    def disasters(self):
+        if len(self._disasters) > 0:
+            return self._disasters
+        else:
+            return None
+
+    def prepare_head(self, day=None):
+        out = dict({
+            'identifier': self.identifier,
+            'basin': self.basin,
+            'day_of_month': self.measure_day,
+            'synophour': self.measure_time,
+            'special_marks': self._literal_part
+        })
+        if day is not None:
+            out['day_of_month'] = str(day)
+            out['synophour'] = '8'
+        out.update(EMPTY_OUTPUT)
+        return out
+
+    def decode(self):
+        out = []
+        if self.standard_daily is not None:
+            output = self.prepare_head()
+            body, _ = StandardObservation(self.standard_daily).decode()
+            if body is not None:
+                output.update(body)
+            out.append(output)
+
+        if self.previous_standard_daily is not None:
+            for previous_standard_daily in self.previous_standard_daily:
+                body, day = StandardObservation(previous_standard_daily).decode()
+                output = self.prepare_head(day)
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+
+        if self.stage_and_flow is not None:
+            for stage_and_flow in self.stage_and_flow:
+                body = StageAndFlow(stage_and_flow).decode()
+                output = self.prepare_head()
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+
+        if self.reservoir_stage_and_volume_daily is not None:
+            for stage_and_volume in self.reservoir_stage_and_volume_daily:
+                body, day = StageAndVolume(stage_and_volume).decode()
+                output = self.prepare_head(day)
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+
+        if self.reservoir_inflow_daily is not None:
+            for inflow in self.reservoir_inflow_daily:
+                body, day = Inflow(inflow).decode()
+                output = self.prepare_head(day)
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+
+        if self.reservoir_flow_and_surface_period is not None:
+            for flow_and_surface in self.reservoir_flow_and_surface_period:
+                body = FlowAndSurface(flow_and_surface).decode_flow()
+                output = self.prepare_head()
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+                body = FlowAndSurface(flow_and_surface).decode_surface()
+                output = self.prepare_head()
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+
+        if self.disasters is not None:
+            for disaster in self.disasters:
+                body = Disaster(disaster).decode()
+                output = self.prepare_head()
+                if body is not None:
+                    output.update(body)
+                out.append(output)
+
+        return out
+
+    def get_literal_part(self):
+        """Split '_report' to numeral array and text part (if exist)"""
+        regex = '([(0-9\/\)\s]*)\s([а-яА-Яa-zA-Z].*)'
+        report = self._report
+        if re.search(regex, report):
+            pattern = re.compile(regex)
+            row = pattern.findall(report)
+            literal_part = row[0][1]
+        else:
+            literal_part = None
+        self._literal_part = literal_part
+        return literal_part
+
+    def ts_to_date(self):
+        """Convert received date to date attributes"""
+        dt = datetime.datetime.fromtimestamp(float(self._ts))
+        self._YY = dt.day
 
 
 def bulletin_reports(bulletin):
-  """
+    """
     each report in bulletin start with new line and ended with '='
     return iterator for reports in bulletin  
-  """
-  return map(lambda m: re.sub(r"\s+", ' ', m.group(1)).strip(), re.finditer(report_bounds, bulletin))
+    """
+    report_bounds = re.compile(r'((.)*?)=', re.DOTALL | re.MULTILINE)
+    return map(lambda m: re.sub(r"\s+", ' ', m.group(1)).strip(), re.finditer(report_bounds, bulletin))
 
+def clean(string, artifacts='\x0f\x0e'):
+    """Input sometimes contain unvisible artifacts (\x0f, \x0e)
+    which deleted by this function. 
+    Set 'artifacts' to delete other artifacts."""
+    encoding = 'koi8-r'
+    artifacts = [ord(x) for x in artifacts]
+    byte_string = string.encode(encoding)
+    out_byte_string = byte_string
+    for i in range(len(byte_string)):
+        if byte_string[i] in artifacts:
+            for j in range(len(out_byte_string)):
+                if out_byte_string[j] == byte_string[i]:
+                    out_byte_string = out_byte_string[:j] + out_byte_string[j+1:]
+                    break
+    return out_byte_string.decode(encoding)
 
 def decode(bulletin):
-  if bulletin.split()[0].upper() != 'HHZZ':
-    raise TypeError("Report does not contain HHZZ in first line")
-  return bulletin_reports(bulletin[4:])
-
-
-def parse_file(filename):
-  with open(filename, 'r') as f:
-    bulletin = f.read()
-    for report in decode(bulletin):
-      try:
-        return KN15(report).decode()
-      except Exception as ex:
-        print(ex)
-
-
-def parse_report(report):
-  try:
-    return KN15(report).decode()
-  except Exception as ex:
-    print(ex)
-
-
-@click.command()
-@click.option('--filename', help='path to file', default=False)
-@click.option('--report', help='Report string to decode', default=False)
-def parse(filename, report):
-  if filename:
-    print(parse_file(filename))
-  if report:
-    print(parse_report(report))
-
-
-if __name__ == "__main__":
-  parse()
+    """First line sometimes contain additional symbols after 'HHZZ'.
+    First line is deleted fully."""
+    bulletin = clean(bulletin)
+    header = bulletin.split()[0].upper()
+    if header != 'HHZZ':
+        raise TypeError(f'Report does not contain HHZZ in first line. "{header}" was received .')
+    bulletin = re.sub(r'.*[\n|\r]', '', bulletin, 1)
+    return  bulletin_reports(bulletin)
 
 
